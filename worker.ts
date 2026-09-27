@@ -5,7 +5,15 @@ import { default as handler } from "./.open-next/worker.js";
 type Env = { CRON_SECRET?: string; NEXT_PUBLIC_SITE_URL?: string };
 
 export default {
-  fetch: handler.fetch,
+  // www.kruk.marketing → kruk.marketing (301), решта — сайт Next.js.
+  fetch(req: Request, env: Env, ctx: unknown) {
+    const url = new URL(req.url);
+    if (url.hostname.startsWith("www.")) {
+      url.hostname = url.hostname.slice(4);
+      return Response.redirect(url.toString(), 301);
+    }
+    return handler.fetch(req, env, ctx);
+  },
 
   // Cron викликає наш же API-роут через fetch воркера — логіка лишається в Next.js.
   async scheduled(_event: unknown, env: Env, ctx: { waitUntil(p: Promise<unknown>): void }) {
