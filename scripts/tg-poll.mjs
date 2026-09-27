@@ -12,6 +12,13 @@ const env = Object.fromEntries(
 const API = `https://api.telegram.org/bot${env.TG_BOT_TOKEN}`;
 const TARGET = process.env.TARGET ?? "http://localhost:3000/api/telegram/webhook";
 
+// Якщо webhook уже веде на робочий сайт — не чіпаємо, інакше зламаємо production-бота.
+const info = await (await fetch(`${API}/getWebhookInfo`)).json();
+if (info.result?.url && !process.argv.includes("--force")) {
+  console.error(`tg-poll: webhook уже встановлено на ${info.result.url} — зупиняюсь.`);
+  console.error("Для локальної розробки створіть окремого тестового бота або запустіть з --force (зламає робочого бота).");
+  process.exit(1);
+}
 await fetch(`${API}/deleteWebhook`);
 console.log("tg-poll: слухаю оновлення бота →", TARGET);
 
