@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { normalizeEmail, validateEmail } from "@/lib/email";
-import { generatePromoCode } from "@/lib/promo";
-import { hasEmail, rateLimited, saveContact } from "@/lib/store";
+import { createHash } from "node:crypto";
+import { createEmailContact, hasEmail, rateLimited, reservePromoCode } from "@/lib/store";
 import type { WaitlistRequest, WaitlistResponse } from "@/lib/waitlist-types";
 
 const CONSENT_VERSION = "2026-10-01";
@@ -34,24 +34,26 @@ export async function POST(req: Request) {
   if (body.consent !== true) return reply({ status: "consent_required", field: "consent" }, 422);
 
   const email = normalizeEmail(body.email);
-  if (await rateLimited(`email:${email}`, 3, 60 * 60_000)) {
+  const emailHash = createHash("sha256").update(email).digest("hex");
+  if (await rateLimited(`email:${emailHash}`, 3, 60 * 60_000)) {
     return reply({ status: "rate_limited" }, 429, { "Retry-After": "60" });
   }
   if (await hasEmail(email)) return reply({ status: "duplicate" });
 
   const now = new Date().toISOString();
   try {
-    await saveContact({
+    const created = await createEmailContact({
       createdAt: now,
       channel: "email",
       email,
       consentAt: now,
       consentVersion: CONSENT_VERSION,
-      promoCode: generatePromoCode(),
+      promoCode: await reservePromoCode(`email:${emailHash}`),
       utm: body.utm ?? {},
       referrer: (body.referrer ?? "").slice(0, 500),
       formLocation: body.location === "footer" ? "footer" : "hero",
     });
+    if (!created) return reply({ status: "duplicate" });
   } catch (e) {
     console.error("[waitlist] save failed", e);
     return reply({ status: "unavailable" }, 503);

@@ -6,12 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-        "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "tg:poll": "node scripts/tg-poll.mjs"
   },
   "dependencies": {
+    "@upstash/redis": "^1.39.0",
     "next": "^16.3.6",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

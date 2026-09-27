@@ -1,12 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { content } from "@/content/uk";
 import { config } from "@/lib/config";
 import { track } from "@/lib/analytics";
+import { captureUtm, readUtm } from "@/lib/utm";
 
-// Етап 2: додати ?start=<token> з UTM (POST /api/telegram/start-token).
+const botUrl = config.tgBotUsername ? `https://t.me/${config.tgBotUsername}` : "#";
+
+// Під час завантаження отримуємо токен з UTM → t.me/<bot>?start=<token>.
+// Якщо токен не отримано, посилання веде в бот без нього (джерело direct).
 export function TelegramButton({ location }: { location: "hero" | "footer" }) {
-  const href = config.tgBotUsername ? `https://t.me/${config.tgBotUsername}` : "#";
+  const [href, setHref] = useState(botUrl);
+
+  useEffect(() => {
+    if (!config.tgBotUsername) return;
+    captureUtm();
+    const { utm, referrer } = readUtm();
+    let cancelled = false;
+    fetch("/api/telegram/start-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ utm, referrer, location }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { token?: string } | null) => {
+        if (!cancelled && d?.token) setHref(`${botUrl}?start=${d.token}`);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [location]);
+
   return (
     <a
       href={href}
