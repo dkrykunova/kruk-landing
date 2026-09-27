@@ -1,11 +1,9 @@
 // Google Sheets через сервісний акаунт (без важкої бібліотеки googleapis).
-// Локально: GOOGLE_SERVICE_ACCOUNT_FILE=secrets/google-service-account.json
-// На хостингу: GOOGLE_SERVICE_ACCOUNT_JSON='{"client_email":…,"private_key":…}'
+// Ключ сервісного акаунта — одним рядком у GOOGLE_SERVICE_ACCOUNT_JSON
+// (локально в .env.local, на Cloudflare — секрет воркера).
 import "server-only";
 
 import { createSign } from "node:crypto";
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import type { Contact } from "./store";
 
 export const SHEET_TAB = "waitlist";
@@ -38,10 +36,7 @@ type ServiceAccount = { client_email: string; private_key: string };
 
 function serviceAccount(): ServiceAccount | null {
   const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (raw) return JSON.parse(raw);
-  const file = process.env.GOOGLE_SERVICE_ACCOUNT_FILE;
-  if (file) return JSON.parse(readFileSync(path.resolve(process.cwd(), file), "utf8"));
-  return null;
+  return raw ? JSON.parse(raw) : null;
 }
 
 export const sheetsEnabled = () => !!process.env.SHEET_ID && !!serviceAccount();

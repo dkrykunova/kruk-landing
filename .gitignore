@@ -9,3 +9,7 @@ next-env.d.ts
 .DS_Store
 fonts-source
 secrets/
+.open-next
+.wrangler
+.dev.vars
+.env.local.cf-build-hidden

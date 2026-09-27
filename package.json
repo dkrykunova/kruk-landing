@@ -8,9 +8,13 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "tg:poll": "node scripts/tg-poll.mjs",
-    "tg:webhook": "node scripts/tg-webhook.mjs"
+    "tg:webhook": "node scripts/tg-webhook.mjs",
+    "cf:build": "sh scripts/cf-build.sh",
+    "cf:preview": "sh scripts/cf-build.sh && opennextjs-cloudflare preview",
+    "cf:deploy": "sh scripts/cf-build.sh && opennextjs-cloudflare deploy"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.6",
     "@upstash/redis": "^1.39.0",
     "next": "^16.3.6",
     "react": "^19.3.0",
@@ -23,6 +27,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "wrangler": "^4.142.0"
   }
 }

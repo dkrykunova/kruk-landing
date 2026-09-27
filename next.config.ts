@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Нічого з цього не потрібно серверу — і не повинно потрапити в бандл.
+  outputFileTracingExcludes: {
+    "*": ["secrets/**", "fonts-source/**", "scripts/**", ".env*", "*.md", "wrangler.jsonc", "worker.ts"],
+  },
   async headers() {
     return [
       {
