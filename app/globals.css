@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/* Палітра: dark indigo #23003F, red #F94500, light purple #BCACCE, light yellow #FFFDB4 */
+@theme {
+  /* Фони */
+  --color-paper: #fffdf0;
+  --color-paper-2: #f1ecf6;
+  --color-line: #e3dceb;
+
+  /* Текст і темні блоки */
+  --color-ink: #23003f;
+  --color-ink-2: #3b1a5e;
+  --color-ink-3: #5e4a78;
+
+  /* Акценти */
+  --color-lilac: #bcacce;
+  --color-lilac-soft: #e6deef;
+  --color-butter: #fffdb4;
+  --color-butter-deep: #f5f08a;
+  --color-orange: #f94500;
+  --color-orange-hover: #ff6a2b;
+  --color-orange-ink: #c23600; /* помилки на світлому фоні */
+
+  --color-telegram: #229ed9;
+  --color-telegram-deep: #1a7fb0;
+
+  --font-sans: var(--font-commissioner), system-ui, sans-serif;
+  --font-serif: var(--font-nyght), Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-lilac);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Honeypot: поза екраном, не display:none */
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
