@@ -24,6 +24,8 @@ export type Contact = {
   formLocation: "hero" | "footer" | "bot";
   unsubscribedAt?: string;
   sheetRow?: number; // номер рядка в Google Sheets
+  brevoSyncedAt?: string;
+  welcomeSentAt?: string;
 };
 
 export type StartContext = {
@@ -173,6 +175,7 @@ export async function rateLimited(key: string, limit: number, windowMs: number):
 
 // ── Синхронізація з Google Sheets ──────────────────────────────────────────
 const SHEETS_PENDING = "waitlist:sheets-pending";
+const BREVO_PENDING = "waitlist:brevo-pending";
 
 export const contactKey = (c: Pick<Contact, "channel" | "email" | "tgId">) =>
   c.channel === "telegram" ? tgKey(c.tgId!) : emailKey(c.email);
@@ -196,4 +199,18 @@ export async function sheetSyncDone(key: string): Promise<void> {
 
 export async function pendingSheetSync(limit = 50): Promise<string[]> {
   return kv.zrange(SHEETS_PENDING, limit);
+}
+
+export const emailContactKey = emailKey;
+
+export async function queueBrevoSync(key: string): Promise<void> {
+  await kv.zadd(BREVO_PENDING, Date.now(), key);
+}
+
+export async function brevoSyncDone(key: string): Promise<void> {
+  await kv.zrem(BREVO_PENDING, key);
+}
+
+export async function pendingBrevoSync(limit = 50): Promise<string[]> {
+  return kv.zrange(BREVO_PENDING, limit);
 }

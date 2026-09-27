@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     return reply({ status: "unavailable" }, 503);
   }
 
-  // Після відповіді: Google Sheets. TODO: Brevo (контакт + атрибути), Meta CAPI (Lead з eventId).
+  // Після відповіді: Google Sheets і Brevo (+ вітальний лист). TODO: Meta CAPI (Lead з eventId).
   after(() => syncContact(contact));
   return reply({ status: "ok" });
 }
