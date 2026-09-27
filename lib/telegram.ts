@@ -21,7 +21,7 @@ export async function tg<T = unknown>(method: string, body: Record<string, unkno
   return data.result as T;
 }
 
-export function sendMessage(chatId: number, text: string, keyboard?: Keyboard) {
+export function sendMessage(chatId: number | string, text: string, keyboard?: Keyboard) {
   return tg("sendMessage", {
     chat_id: chatId,
     text,

@@ -12,8 +12,8 @@
     { "pattern": "kruk.marketing", "custom_domain": true },
     { "pattern": "www.kruk.marketing", "custom_domain": true }
   ],
-  // Щогодини — повтор запису в Google Sheets
-  "triggers": { "crons": ["15 * * * *"] },
+  // Щохвилини — розсилки прогріву; щогодини — повтор запису в Sheets і Brevo
+  "triggers": { "crons": ["* * * * *", "15 * * * *"] },
   // Публічні змінні (не секрети). Секрети — через `wrangler secret bulk`.
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://kruk.marketing",

@@ -3,6 +3,7 @@ import "server-only";
 
 import { company, content } from "@/content/uk";
 import { config } from "./config";
+import { esc, renderEmail } from "./email-template";
 import type { Contact } from "./store";
 
 const API = "https://api.brevo.com/v3";
@@ -51,30 +52,17 @@ export async function upsertBrevoContact(c: Contact): Promise<void> {
   });
 }
 
-const esc = (s: string) =>
-  s.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]!);
-
 function welcomeHtml(email: string): string {
   const w = content.email.welcome;
-  const channel = config.tgChannelUrl
-    ? `<p style="margin:24px 0 12px">${esc(w.channelText)}</p>
-       <a href="${config.tgChannelUrl}" style="display:inline-block;background:#f94500;color:#23003f;font-weight:700;text-decoration:none;padding:14px 26px;border-radius:999px">${esc(w.channelButton)}</a>`
-    : "";
-  return `<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(w.subject)}</title></head>
-<body style="margin:0;background:#fffdf0;font-family:Arial,Helvetica,sans-serif;color:#23003f">
-<span style="display:none;max-height:0;overflow:hidden">${esc(w.preheader)}</span>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid #e3dceb;border-radius:24px">
-<tr><td style="padding:32px 32px 8px;font-size:28px;font-weight:800;letter-spacing:-0.5px">крук<span style="color:#f94500">.</span></td></tr>
-<tr><td style="padding:8px 32px 32px;font-size:16px;line-height:1.55">
-<h1 style="margin:8px 0 12px;font-size:30px;line-height:1.15">${esc(w.title)}</h1>
-<p style="margin:0 0 20px">${esc(w.intro)}</p>
-<p style="margin:0 0 8px;font-weight:700">${esc(w.whatNext)}</p>
-<ol style="margin:0;padding-left:20px">${w.steps.map((s) => `<li style="margin:0 0 6px">${esc(s)}</li>`).join("")}</ol>
-${channel}
-</td></tr></table>
-<p style="max-width:560px;margin:20px auto 0;font-size:12px;line-height:1.5;color:#5e4a78">${esc(w.footer(email))}<br>© 2026 ${esc(company.legalName)} · <a href="${config.siteUrl}/privacy" style="color:#5e4a78">Політика конфіденційності</a></p>
-</td></tr></table></body></html>`;
+  return renderEmail({
+    title: w.title,
+    preheader: w.preheader,
+    body: [w.intro, `${w.whatNext}:\n${w.steps.map((s, i) => `${i + 1}. ${s}`).join("\n")}`, config.tgChannelUrl ? w.channelText : ""]
+      .filter(Boolean)
+      .join("\n\n"),
+    cta: config.tgChannelUrl ? { text: w.channelButton, url: config.tgChannelUrl } : undefined,
+    footerHtml: `${esc(w.footer(email))}<br>© 2026 ${esc(company.legalName)} · <a href="${config.siteUrl}/privacy" style="color:#5e4a78">Політика конфіденційності</a>`,
+  });
 }
 
 function welcomeText(email: string): string {

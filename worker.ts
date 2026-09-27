@@ -15,13 +15,19 @@ export default {
     return handler.fetch(req, env, ctx);
   },
 
-  // Cron викликає наш же API-роут через fetch воркера — логіка лишається в Next.js.
-  async scheduled(_event: unknown, env: Env, ctx: { waitUntil(p: Promise<unknown>): void }) {
-    const req = new Request(`${env.NEXT_PUBLIC_SITE_URL ?? "https://kruk.marketing"}/api/cron/retry-sync`, {
+  // Cron викликає наші ж API-роути через fetch воркера — логіка лишається в Next.js.
+  //   "* * * * *"  → /api/cron/broadcast (прогрів у канал і бот)
+  //   "15 * * * *" → /api/cron/retry-sync (повтор запису в Sheets і Brevo)
+  async scheduled(event: { cron: string }, env: Env, ctx: { waitUntil(p: Promise<unknown>): void }) {
+    const path = event.cron === "15 * * * *" ? "/api/cron/retry-sync" : "/api/cron/broadcast";
+    const req = new Request(`${env.NEXT_PUBLIC_SITE_URL ?? "https://kruk.marketing"}${path}`, {
       headers: { authorization: `Bearer ${env.CRON_SECRET}` },
     });
     ctx.waitUntil(
-      handler.fetch(req, env, ctx).then(async (r: Response) => console.log("cron retry-sync", r.status, await r.text())),
+      handler.fetch(req, env, ctx).then(async (r: Response) => {
+        const body = await r.text();
+        if (path !== "/api/cron/broadcast" || body.includes("report")) console.log("cron", path, r.status, body);
+      }),
     );
   },
 };

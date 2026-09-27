@@ -26,6 +26,7 @@ export type Contact = {
   sheetRow?: number; // номер рядка в Google Sheets
   brevoSyncedAt?: string;
   welcomeSentAt?: string;
+  promoSentAt?: string;
 };
 
 export type StartContext = {
@@ -37,6 +38,11 @@ export type StartContext = {
 
 // ── Мінімальний інтерфейс, який реалізують і Redis, і пам'ять ──────────────
 interface Kv {
+  mget<T>(keys: string[]): Promise<(T | null)[]>;
+  sadd(key: string, members: string[]): Promise<void>;
+  smismember(key: string, members: string[]): Promise<boolean[]>;
+  del(key: string): Promise<void>;
+  zrangeAll(key: string): Promise<string[]>;
   zrem(key: string, member: string): Promise<void>;
   zrange(key: string, count: number): Promise<string[]>;
   get<T>(key: string): Promise<T | null>;
@@ -65,6 +71,16 @@ function redisKv(r: Redis): Kv {
       await r.zrem(k, member);
     },
     zrange: (k, count) => r.zrange<string[]>(k, 0, count - 1),
+    zrangeAll: (k) => r.zrange<string[]>(k, 0, -1),
+    mget: async <T,>(keys: string[]) => (keys.length ? r.mget<(T | null)[]>(...keys) : []),
+    async sadd(k, members) {
+      if (members.length) await r.sadd(k, members[0], ...members.slice(1));
+    },
+    smismember: async (k, members) =>
+      members.length ? (await r.smismember(k, members)).map((v) => v === 1) : [],
+    async del(k) {
+      await r.del(k);
+    },
   };
 }
 
@@ -92,6 +108,20 @@ function memoryKv(): Kv {
     async zadd() {},
     async zrem() {},
     zrange: async () => [],
+    zrangeAll: async () => [],
+    mget: async <T,>(keys: string[]) => keys.map((k) => (alive(k)?.v as T) ?? null),
+    async sadd(k, members) {
+      const set = new Set((alive(k)?.v as string[]) ?? []);
+      members.forEach((m) => set.add(m));
+      m.set(k, { v: [...set] });
+    },
+    smismember: async (k, members) => {
+      const set = new Set((alive(k)?.v as string[]) ?? []);
+      return members.map((x) => set.has(x));
+    },
+    async del(k) {
+      m.delete(k);
+    },
   };
 }
 
@@ -213,4 +243,26 @@ export async function brevoSyncDone(key: string): Promise<void> {
 
 export async function pendingBrevoSync(limit = 50): Promise<string[]> {
   return kv.zrange(BREVO_PENDING, limit);
+}
+
+// ── Розсилки прогріву ──────────────────────────────────────────────────────
+export const broadcastsEnabled = async () => (await kv.get<string>("broadcasts:enabled")) === "1";
+export const broadcastReady = async (id: string) => (await kv.get<string>(`broadcast:${id}:ready`)) === "1";
+
+/** Одноразовий замок: true — якщо цей виклик першим «забрав» дію. */
+export const claimOnce = (key: string) => kv.set(key, new Date().toISOString(), { nx: true });
+export const releaseClaim = (key: string) => kv.del(key);
+
+/** Підписники бота, яким ця розсилка ще не надсилалась (до limit). */
+export async function pendingBotRecipients(broadcastId: string, limit: number): Promise<Contact[]> {
+  const keys = (await kv.zrangeAll(INDEX)).filter((k) => k.startsWith("waitlist:tg:"));
+  const ids = keys.map((k) => k.slice("waitlist:tg:".length));
+  const sent = await kv.smismember(`broadcast:${broadcastId}:sent`, ids);
+  const todo = keys.filter((_, i) => !sent[i]).slice(0, limit * 2);
+  const contacts = await kv.mget<Contact>(todo);
+  return contacts.filter((c): c is Contact => !!c && !c.unsubscribedAt).slice(0, limit);
+}
+
+export async function markBotSent(broadcastId: string, tgIds: number[]): Promise<void> {
+  await kv.sadd(`broadcast:${broadcastId}:sent`, tgIds.map(String));
 }
