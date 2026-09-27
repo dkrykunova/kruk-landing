@@ -4,6 +4,7 @@ export type WaitlistRequest = {
   email: string;
   consent: boolean;
   website?: string; // honeypot
+  turnstileToken?: string;
   location: "hero" | "footer";
   utm?: Utm;
   referrer?: string;

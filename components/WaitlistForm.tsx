@@ -7,6 +7,7 @@ import { suggestEmail, validateEmail, type EmailError } from "@/lib/email";
 import { track } from "@/lib/analytics";
 import { captureUtm, readUtm } from "@/lib/utm";
 import type { WaitlistResponse } from "@/lib/waitlist-types";
+import { useTurnstile } from "@/lib/turnstile-client";
 import { TelegramButton, TelegramIcon } from "./TelegramButton";
 
 type Location = "hero" | "footer";
@@ -34,6 +35,7 @@ export function WaitlistForm({ location }: { location: Location }) {
   const consentRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const started = useRef(false);
+  const turnstile = useTurnstile();
 
   useEffect(() => {
     captureUtm();
@@ -114,12 +116,17 @@ export function WaitlistForm({ location }: { location: Location }) {
     const eventId = crypto.randomUUID();
     const { utm, referrer } = readUtm();
     const website = (new FormData(e.currentTarget).get("website") as string) ?? "";
+    const turnstileToken = await turnstile.getToken();
+    if (turnstileToken === null) {
+      setFormError(t.errors.generic);
+      return setState("idle");
+    }
 
     try {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, consent, website, location, utm, referrer, eventId }),
+        body: JSON.stringify({ email, consent, website, turnstileToken, location, utm, referrer, eventId }),
       });
       const data: WaitlistResponse = await res.json();
 
@@ -257,6 +264,8 @@ export function WaitlistForm({ location }: { location: Location }) {
             {formError}
           </p>
         )}
+
+        <div ref={turnstile.box} className="empty:hidden" />
 
         <div className="hp" aria-hidden="true">
           <label>

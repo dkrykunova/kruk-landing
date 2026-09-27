@@ -3,6 +3,7 @@ import { normalizeEmail, validateEmail } from "@/lib/email";
 import { createHash } from "node:crypto";
 import { createEmailContact, hasEmail, rateLimited, reservePromoCode, type Contact } from "@/lib/store";
 import { syncContact } from "@/lib/sync";
+import { verifyTurnstile } from "@/lib/turnstile-server";
 import type { WaitlistRequest, WaitlistResponse } from "@/lib/waitlist-types";
 
 const CONSENT_VERSION = "2026-10-01";
@@ -12,7 +13,7 @@ function reply(body: WaitlistResponse, status = 200, headers?: HeadersInit) {
 }
 
 export async function POST(req: Request) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  const ip = req.headers.get("cf-connecting-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
   if (await rateLimited(`ip:${ip}`, 5, 10 * 60_000)) {
     return reply({ status: "rate_limited" }, 429, { "Retry-After": "60" });
   }
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
   // Honeypot: боту відповідаємо «успіхом», але нічого не зберігаємо.
   if (body.website) return reply({ status: "ok" });
 
-  // TODO етап 2: перевірка Cloudflare Turnstile (siteverify).
+  if (!(await verifyTurnstile(body.turnstileToken, ip))) return reply({ status: "captcha_failed" }, 400);
 
   const emailError = validateEmail(body.email ?? "");
   if (emailError === "disposable") return reply({ status: "disposable_email", field: "email" }, 422);

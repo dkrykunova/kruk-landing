@@ -13,7 +13,7 @@ const clip = (v: unknown, n = 200) => (typeof v === "string" ? v.slice(0, n) : u
 
 // Зберігає UTM під коротким токеном для deep link t.me/<bot>?start=<token>.
 export async function POST(req: Request) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  const ip = req.headers.get("cf-connecting-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
   if (await rateLimited(`tok:${ip}`, 30, 10 * 60_000)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
