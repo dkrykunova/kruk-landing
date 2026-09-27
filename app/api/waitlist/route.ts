@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { normalizeEmail, validateEmail } from "@/lib/email";
 import { createHash } from "node:crypto";
-import { createEmailContact, hasEmail, rateLimited, reservePromoCode } from "@/lib/store";
+import { createEmailContact, hasEmail, rateLimited, reservePromoCode, type Contact } from "@/lib/store";
+import { syncContact } from "@/lib/sync";
 import type { WaitlistRequest, WaitlistResponse } from "@/lib/waitlist-types";
 
 const CONSENT_VERSION = "2026-10-01";
@@ -41,8 +42,9 @@ export async function POST(req: Request) {
   if (await hasEmail(email)) return reply({ status: "duplicate" });
 
   const now = new Date().toISOString();
+  let contact: Contact;
   try {
-    const created = await createEmailContact({
+    contact = {
       createdAt: now,
       channel: "email",
       email,
@@ -52,13 +54,14 @@ export async function POST(req: Request) {
       utm: body.utm ?? {},
       referrer: (body.referrer ?? "").slice(0, 500),
       formLocation: body.location === "footer" ? "footer" : "hero",
-    });
-    if (!created) return reply({ status: "duplicate" });
+    };
+    if (!(await createEmailContact(contact))) return reply({ status: "duplicate" });
   } catch (e) {
     console.error("[waitlist] save failed", e);
     return reply({ status: "unavailable" }, 503);
   }
 
-  // TODO етап 2: Brevo (контакт + атрибути), Meta CAPI (Lead з eventId).
+  // Після відповіді: Google Sheets. TODO: Brevo (контакт + атрибути), Meta CAPI (Lead з eventId).
+  after(() => syncContact(contact));
   return reply({ status: "ok" });
 }

@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { content } from "@/content/uk";
 import { config, isLaunched } from "@/lib/config";
-import { getTgContact, readStartToken, reservePromoCode, saveTgContact, unsubscribeTg } from "@/lib/store";
+import { getTgContact, readStartToken, reservePromoCode, saveTgContact, unsubscribeTg, type Contact } from "@/lib/store";
+import { syncContact } from "@/lib/sync";
 import { sendMessage, tg, type Keyboard } from "@/lib/telegram";
 
 const t = content.bot;
@@ -46,7 +47,7 @@ async function onJoin(user: TgUser, chatId: number, data: string) {
   const token = data.split(":")[1];
   const ctx = token ? await readStartToken(token) : undefined;
   const now = new Date().toISOString();
-  await saveTgContact({
+  const contact: Contact = {
     createdAt: existing?.createdAt ?? now,
     channel: "telegram",
     email: "",
@@ -59,7 +60,10 @@ async function onJoin(user: TgUser, chatId: number, data: string) {
     utm: ctx?.utm ?? { source: "direct" },
     referrer: ctx?.referrer ?? "",
     formLocation: "bot",
-  });
+    sheetRow: existing?.sheetRow,
+  };
+  await saveTgContact(contact);
+  after(() => syncContact(contact));
   // TODO: GA4 Measurement Protocol + Meta CAPI (Lead, method: telegram)
   return sendMessage(chatId, t.joined, channelKb());
 }
@@ -76,6 +80,8 @@ async function handle(u: Update) {
     // Людина заблокувала бота — вважаємо відпискою.
     if (u.my_chat_member.chat.type === "private" && u.my_chat_member.new_chat_member.status === "kicked") {
       await unsubscribeTg(u.my_chat_member.chat.id);
+      const id = u.my_chat_member.chat.id;
+      after(() => syncContact({ channel: "telegram", email: "", tgId: id } as Contact));
     }
     return;
   }
@@ -91,9 +97,12 @@ async function handle(u: Update) {
       const c = await getTgContact(m.chat.id);
       return sendMessage(m.chat.id, c && !c.unsubscribedAt ? t.status(fmtDate(c.createdAt)) : t.notJoined);
     }
-    case "/stop":
+    case "/stop": {
       await unsubscribeTg(m.chat.id);
+      const id = m.chat.id;
+      after(() => syncContact({ channel: "telegram", email: "", tgId: id } as Contact));
       return sendMessage(m.chat.id, t.stopped);
+    }
     case "/privacy":
       return sendMessage(m.chat.id, t.privacy(`${config.siteUrl}/privacy`));
     default:

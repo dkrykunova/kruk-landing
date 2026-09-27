@@ -23,6 +23,7 @@ export type Contact = {
   referrer: string;
   formLocation: "hero" | "footer" | "bot";
   unsubscribedAt?: string;
+  sheetRow?: number; // номер рядка в Google Sheets
 };
 
 export type StartContext = {
@@ -34,6 +35,8 @@ export type StartContext = {
 
 // ── Мінімальний інтерфейс, який реалізують і Redis, і пам'ять ──────────────
 interface Kv {
+  zrem(key: string, member: string): Promise<void>;
+  zrange(key: string, count: number): Promise<string[]>;
   get<T>(key: string): Promise<T | null>;
   set(key: string, value: unknown, opts?: { nx?: boolean; px?: number }): Promise<boolean>;
   incrWindow(key: string, windowMs: number): Promise<number>;
@@ -56,6 +59,10 @@ function redisKv(r: Redis): Kv {
     async zadd(k, score, member) {
       await r.zadd(k, { score, member });
     },
+    async zrem(k, member) {
+      await r.zrem(k, member);
+    },
+    zrange: (k, count) => r.zrange<string[]>(k, 0, count - 1),
   };
 }
 
@@ -81,6 +88,8 @@ function memoryKv(): Kv {
       return n;
     },
     async zadd() {},
+    async zrem() {},
+    zrange: async () => [],
   };
 }
 
@@ -160,4 +169,31 @@ export async function readStartToken(token: string): Promise<StartContext | null
 /** Фіксоване вікно: true, якщо ліміт перевищено. */
 export async function rateLimited(key: string, limit: number, windowMs: number): Promise<boolean> {
   return (await kv.incrWindow(`rl:${key}`, windowMs)) > limit;
+}
+
+// ── Синхронізація з Google Sheets ──────────────────────────────────────────
+const SHEETS_PENDING = "waitlist:sheets-pending";
+
+export const contactKey = (c: Pick<Contact, "channel" | "email" | "tgId">) =>
+  c.channel === "telegram" ? tgKey(c.tgId!) : emailKey(c.email);
+
+export async function getContact(key: string): Promise<Contact | null> {
+  return kv.get<Contact>(key);
+}
+
+export async function patchContact(key: string, patch: Partial<Contact>): Promise<void> {
+  const c = await kv.get<Contact>(key);
+  if (c) await kv.set(key, { ...c, ...patch });
+}
+
+export async function queueSheetSync(key: string): Promise<void> {
+  await kv.zadd(SHEETS_PENDING, Date.now(), key);
+}
+
+export async function sheetSyncDone(key: string): Promise<void> {
+  await kv.zrem(SHEETS_PENDING, key);
+}
+
+export async function pendingSheetSync(limit = 50): Promise<string[]> {
+  return kv.zrange(SHEETS_PENDING, limit);
 }
