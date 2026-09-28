@@ -111,8 +111,7 @@ function frame(spec, i, n) {
   // Сторіс: верхні й нижні ~250px закриває інтерфейс Instagram — тримаємо все всередині безпечної зони
   const safe = H > 1500 ? 250 : 0;
   const top = M + 40 + safe;
-  if (spec.eyebrow) eyebrow(ctx, th, spec.eyebrow, M, top);
-  if (n > 1) eyebrow(ctx, th, `${String(i + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}`, W - M, top, "right");
+  // Дрібних службових написів (мітки, нумерація слайдів, «Гортайте →») не використовуємо — правило брендбука.
   const titleTop = (spec.titleTop ?? 250) + safe;
   const bottomReserve = (spec.cta ? 330 : 200) + safe;
   let y = drawTitle(ctx, th, spec.title, { x: M, y: titleTop, maxW: W - 2 * M, size: spec.size ?? 92, auto: !spec.size, maxH: spec.maxTitleH ?? (H - titleTop - bottomReserve - (spec.bigLogo ? 260 : 0) - (spec.body ? 200 : 0)) });
@@ -132,8 +131,6 @@ function frame(spec, i, n) {
   if (spec.bigLogo) logo(ctx, th, M, H - 330, 190);
   if (spec.cta) pill(ctx, th, spec.cta, M, H - M - safe - 200, 38);
   logo(ctx, th, M, H - M - safe, 48);
-  if (spec.swipe) eyebrow(ctx, th, "Гортайте →", W - M, H - M, "right");
-  if (spec.note) eyebrow(ctx, th, spec.note, W - M, H - M, "right");
   return cv;
 }
 
