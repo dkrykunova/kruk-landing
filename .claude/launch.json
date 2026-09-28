@@ -4,8 +4,16 @@
     {
       "name": "kruk-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "kruk-visuals",
+      "url": "http://localhost:8123",
+      "port": 8123
     }
   ]
 }

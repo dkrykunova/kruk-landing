@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Крук — рендер візуалів</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;600;800&display=swap">
+<style>
+  @font-face { font-family: "Nyght Serif"; src: url(fonts/NyghtSerif-Medium.ttf); font-weight: 500; font-style: normal; }
+  @font-face { font-family: "Nyght Serif"; src: url(fonts/NyghtSerif-MediumItalic.ttf); font-weight: 500; font-style: italic; }
+  body { margin: 0; background: #ddd; font-family: Commissioner, sans-serif; }
+  #grid { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; }
+  canvas { width: 216px; height: auto; background: #fff; }
+  #log { padding: 12px; font: 14px/1.4 monospace; }
+</style>
+</head>
+<body>
+<div id="log">render…</div>
+<div id="grid"></div>
+<script>
+// ── Токени брендбука ─────────────────────────────────────────────
+const C = { paper: "#fffdf0", ink: "#23003f", ink2: "#3b1a5e", ink3: "#5e4a78", lilac: "#bcacce", butter: "#fffdb4", orange: "#f94500", white: "#ffffff", line: "#e3dceb" };
+// Схема кольорів кадру: фон, текст, другорядний текст, акцент (orange лише на paper/ink), логотип
+const THEMES = {
+  ink:    { bg: C.ink,    text: C.paper, muted: "rgba(255,253,240,0.72)", accent: C.orange, logo: C.paper, dot: C.orange, pill: C.orange, pillText: C.ink },
+  paper:  { bg: C.paper,  text: C.ink,   muted: C.ink3,                   accent: C.orange, logo: C.ink,   dot: C.orange, pill: C.orange, pillText: C.ink },
+  lilac:  { bg: C.lilac,  text: C.ink,   muted: C.ink,                    accent: C.ink,    logo: C.ink,   dot: C.ink,    pill: C.ink,    pillText: C.paper },
+  butter: { bg: C.butter, text: C.ink,   muted: C.ink3,                   accent: C.ink,    logo: C.ink,   dot: C.orange, pill: C.ink,    pillText: C.butter },
+};
+const M = 96; // поля кадру (брендбук: ≥80px)
+
+// Текст з акцентом: *слова* → Nyght Serif курсив кольору accent
+// Нерозривні пробіли: однолітерні й дволітерні слова не лишаються в кінці рядка, тире не починає рядок.
+function typo(s) {
+  return s
+    .replace(/(^|[ \u00a0*])([«„]?[А-ЯІЇЄҐа-яіїєґA-Za-z]{1,2}) /g, "$1$2\u00a0")
+    .replace(/(^|[ \u00a0*])([«„]?[А-ЯІЇЄҐа-яіїєґA-Za-z]{1,2}) /g, "$1$2\u00a0")
+    .replace(/ —/g, "\u00a0—");
+}
+function parse(s) {
+  s = typo(s);
+  const out = []; let italic = false;
+  for (const part of s.split("*")) { if (part) out.push({ t: part, italic }); italic = !italic; }
+  return out;
+}
+function wrap(ctx, segs, size, maxW) {
+  const words = [];
+  for (const sg of segs) for (const w of sg.t.split(/( +)/)) if (w) words.push({ t: w, italic: sg.italic });
+  const lines = [[]]; let x = 0;
+  for (const w of words) {
+    ctx.font = `${w.italic ? "italic " : ""}500 ${size}px "Nyght Serif"`;
+    const ww = ctx.measureText(w.t).width;
+    if (/^ +$/.test(w.t)) { if (x > 0) { lines.at(-1).push({ ...w, w: ww }); x += ww; } continue; }
+    if (x + ww > maxW && x > 0) {
+      while (lines.at(-1).length && /^ +$/.test(lines.at(-1).at(-1).t)) lines.at(-1).pop();
+      lines.push([]); x = 0;
+    }
+    lines.at(-1).push({ ...w, w: ww }); x += ww;
+  }
+  return lines;
+}
+function drawTitle(ctx, th, text, { x, y, maxW, size, maxH, auto }) {
+  let s = size, lines;
+  if (auto) { // найбільший кегль 88–132px, за якого текст займає не більше ~60% вільної висоти й ≤ 5 рядків
+    for (s = 132; s > 88; s -= 4) { lines = wrap(ctx, parse(text), s, maxW); if (lines.length <= 5 && lines.length * s * 1.08 <= maxH * 0.62) break; }
+  }
+  for (;;) { lines = wrap(ctx, parse(text), s, maxW); if (lines.length * s * 1.08 <= maxH || s <= 48) break; s -= 4; }
+  ctx.textBaseline = "alphabetic";
+  lines.forEach((ln, i) => {
+    let cx = x;
+    for (const w of ln) {
+      ctx.font = `${w.italic ? "italic " : ""}500 ${s}px "Nyght Serif"`;
+      ctx.fillStyle = w.italic ? th.accent : th.text;
+      ctx.fillText(w.t, cx, y + s * 0.9 + i * s * 1.08);
+      cx += w.w;
+    }
+  });
+  return y + lines.length * s * 1.08;
+}
+function sans(ctx, weight, size, spacing = "0px") { ctx.font = `${weight} ${size}px Commissioner`; ctx.letterSpacing = spacing; }
+function eyebrow(ctx, th, text, x, y, align = "left") {
+  sans(ctx, 600, 26, "1.5px"); ctx.fillStyle = th.muted; ctx.textAlign = align; ctx.fillText(text.toUpperCase(), x, y); ctx.textAlign = "left"; ctx.letterSpacing = "0px";
+}
+function logo(ctx, th, x, y, size) { // «крук.» — Commissioner 800, трекінг −2.5%, крапка orange
+  sans(ctx, 800, size, `${-0.025 * size}px`);
+  ctx.fillStyle = th.logo; ctx.fillText("крук", x, y);
+  const w = ctx.measureText("крук").width;
+  ctx.fillStyle = th.dot; ctx.fillText(".", x + w, y);
+  ctx.letterSpacing = "0px";
+}
+function pill(ctx, th, text, x, y, size = 34) {
+  sans(ctx, 600, size); const w = ctx.measureText(text).width, h = size * 2.4, pw = w + size * 1.8;
+  ctx.fillStyle = th.pill; ctx.beginPath(); ctx.roundRect(x, y, pw, h, h / 2); ctx.fill();
+  ctx.fillStyle = th.pillText; ctx.textBaseline = "middle"; ctx.fillText(text, x + size * 0.9, y + h / 2 + 2); ctx.textBaseline = "alphabetic";
+  return { w: pw, h };
+}
+function body(ctx, th, text, x, y, maxW, size = 36) { // Commissioner 400, ≤ 3–4 рядки
+  sans(ctx, 400, size); ctx.fillStyle = th.text;
+  const words = text.split(" "); let line = "", yy = y;
+  for (const w of words) { const t = line ? line + " " + w : w; if (ctx.measureText(t).width > maxW && line) { ctx.fillText(line, x, yy); line = w; yy += size * 1.45; } else line = t; }
+  if (line) ctx.fillText(line, x, yy);
+  return yy;
+}
+
+// ── Кадр ──────────────────────────────────────────────────────────
+function frame(spec, i, n) {
+  const W = spec.w ?? 1080, H = spec.h ?? 1350, th = THEMES[spec.theme];
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const ctx = cv.getContext("2d"); ctx.fontKerning = "normal";
+  ctx.fillStyle = th.bg; ctx.fillRect(0, 0, W, H);
+  ctx.textBaseline = "alphabetic";
+  // Сторіс: верхні й нижні ~250px закриває інтерфейс Instagram — тримаємо все всередині безпечної зони
+  const safe = H > 1500 ? 250 : 0;
+  const top = M + 40 + safe;
+  if (spec.eyebrow) eyebrow(ctx, th, spec.eyebrow, M, top);
+  if (n > 1) eyebrow(ctx, th, `${String(i + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}`, W - M, top, "right");
+  const titleTop = (spec.titleTop ?? 250) + safe;
+  const bottomReserve = (spec.cta ? 330 : 200) + safe;
+  let y = drawTitle(ctx, th, spec.title, { x: M, y: titleTop, maxW: W - 2 * M, size: spec.size ?? 92, auto: !spec.size, maxH: spec.maxTitleH ?? (H - titleTop - bottomReserve - (spec.bigLogo ? 260 : 0) - (spec.body ? 200 : 0)) });
+  if (spec.body) y = body(ctx, th, spec.body, M, y + 70, W - 2 * M) + 20;
+  if (spec.flow) { // вертикальна схема з капсул
+    let fy = y + 56;
+    spec.flow.forEach((step, k) => {
+      const hl = step.startsWith("!"); const label = hl ? step.slice(1) : step;
+      const t2 = hl ? { ...th, pill: C.orange, pillText: C.ink } : { ...th, pill: spec.theme === "paper" ? C.white : C.paper, pillText: C.ink };
+      if (!hl) { ctx.strokeStyle = C.line; }
+      const p = pill(ctx, t2, label, M, fy, 44);
+      if (!hl && spec.theme === "paper") { ctx.lineWidth = 2; ctx.strokeStyle = C.line; ctx.beginPath(); ctx.roundRect(M + 1, fy + 1, p.w - 2, p.h - 2, p.h / 2); ctx.stroke(); }
+      fy += p.h;
+      if (k < spec.flow.length - 1) { sans(ctx, 600, 48); ctx.fillStyle = th.muted; ctx.fillText("↓", M + 36, fy + 60); fy += 80; }
+    });
+  }
+  if (spec.bigLogo) logo(ctx, th, M, H - 330, 190);
+  if (spec.cta) pill(ctx, th, spec.cta, M, H - M - safe - 200, 38);
+  logo(ctx, th, M, H - M - safe, 48);
+  if (spec.swipe) eyebrow(ctx, th, "Гортайте →", W - M, H - M, "right");
+  if (spec.note) eyebrow(ctx, th, spec.note, W - M, H - M, "right");
+  return cv;
+}
+
+// ── Контент-пакет №1 ─────────────────────────────────────────────
+const EB = "Маркетинг малого бізнесу";
+const SETS = [
+  { name: "ig1", theme: "ink", eyebrow: EB, slides: [
+    { title: "Маркетинг малого бізнесу рідко «неважливий». Він просто завжди — *на потім.*", swipe: true },
+    { title: "Спочатку клієнти, команда, оплати, постачання." },
+    { title: "Потім — «треба щось викласти»." },
+    { title: "Потім — «а про що писати?»" },
+    { title: "А потім сторінка мовчить ще один тиждень." },
+    { title: "Це не проблема дисципліни. Це проблема *системи.*" },
+    { title: "КРУК допомагає готувати контент українською та планувати публікації.", bigLogo: true },
+    { title: "Щоб ваш маркетинг не залежав від *одного вільного вечора.*" },
+    { title: "Ранній доступ до КРУКа", cta: "Посилання в профілі" },
+  ]},
+  { name: "ig2", theme: "lilac", eyebrow: "КРУК · ранній доступ", slides: [
+    { title: "Вам не потрібен *ще один* контент-план, який лежатиме в Google Docs.", size: 100, titleTop: 300 },
+  ]},
+  { name: "ig2-story", theme: "paper", w: 1080, h: 1920, eyebrow: null, slides: [
+    { title: "Не ще один контент-план. *Шлях до публікації.*", titleTop: 80, size: 80, maxTitleH: 320, flow: ["Ідея", "!КРУК", "Готовий пост українською", "Запланована публікація"], cta: "Ранній доступ — посилання в профілі" },
+  ]},
+  { name: "ig3", theme: "paper", eyebrow: EB, slides: [
+    { title: "КРУК не має перетворити ваш бізнес на *безликий AI-акаунт.*", swipe: true },
+    { title: "У малого бізнесу вже є голос: досвід, клієнти, продукт, погляд." },
+    { title: "Але цей голос часто не доходить до публікації." },
+    { title: "Бо власник зайнятий тим, що тримає бізнес у русі." },
+    { title: "КРУК не замінює *ваші думки.*" },
+    { title: "Він допомагає перетворювати їх на зрозумілий контент українською." },
+    { title: "І підтримувати регулярність через планування публікацій." },
+    { title: "Ваш бізнес. Ваш голос. *Менше ручної рутини.*" },
+    { title: "Приєднатися до раннього доступу", cta: "Посилання в профілі" },
+  ]},
+  { name: "fb1", theme: "butter", eyebrow: EB, slides: [
+    { title: "Чому сторінки малого бізнесу замовкають, навіть коли продукт *хороший?*", body: "Ідея → готовий пост → запланована публікація. Так має виглядати регулярний маркетинг." },
+  ]},
+  { name: "fb2", theme: "ink", eyebrow: "КРУК · ранній доступ", slides: [
+    { title: "Шукаємо перші малі бізнеси для *раннього доступу* до КРУКа", cta: "Заявка — за посиланням у пості" },
+  ]},
+];
+
+(async () => {
+  await document.fonts.load('500 40px "Nyght Serif"'); await document.fonts.load('italic 500 40px "Nyght Serif"');
+  await document.fonts.load("400 40px Commissioner"); await document.fonts.load("600 40px Commissioner"); await document.fonts.load("800 40px Commissioner");
+  await document.fonts.load("400 40px Commissioner", "крук"); await document.fonts.load("800 40px Commissioner", "крук");
+  const grid = document.getElementById("grid"), log = [];
+  const save = location.hash === "#save";
+  for (const set of SETS) {
+    for (let i = 0; i < set.slides.length; i++) {
+      const spec = { theme: set.theme, eyebrow: set.eyebrow, w: set.w, h: set.h, ...set.slides[i] };
+      const cv = frame(spec, i, set.slides.length); grid.appendChild(cv);
+      const name = set.slides.length > 1 ? `${set.name}-${String(i + 1).padStart(2, "0")}.png` : `${set.name}.png`;
+      if (save) {
+        const blob = await new Promise((r) => cv.toBlob(r, "image/png"));
+        const res = await fetch(`/save?name=${name}`, { method: "POST", body: blob });
+        log.push(`${name} ${res.status}`);
+      }
+    }
+  }
+  document.getElementById("log").textContent = save ? "saved: " + log.join(", ") : `rendered ${grid.children.length} frames`;
+  window.__done = true;
+})();
+</script>
+</body>
+</html>
