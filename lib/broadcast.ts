@@ -42,7 +42,7 @@ export async function runBroadcasts(now = Date.now(), dry = false) {
 
   for (const b of broadcasts) {
     const at = Date.parse(b.sendAt);
-    if (now < at || now - at > MAX_LATE) continue;
+    if (Number.isNaN(at) || Number.isNaN(now) || now < at || now - at > MAX_LATE) continue;
 
     const blocked = await isSendable(b);
     if (blocked) {

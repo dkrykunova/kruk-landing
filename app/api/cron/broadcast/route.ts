@@ -10,6 +10,9 @@ export async function GET(req: Request) {
   }
   const url = new URL(req.url);
   const dry = url.searchParams.get("dry") === "1";
-  const at = url.searchParams.get("at");
-  return NextResponse.json(await runBroadcasts(at && dry ? Date.parse(at) : Date.now(), dry));
+  // at — ISO у UTC (…Z) або мілісекунди; «+03:00» у URL легко псується на пробіл.
+  const atRaw = url.searchParams.get("at");
+  const at = atRaw ? (/^\d+$/.test(atRaw) ? Number(atRaw) : Date.parse(atRaw.replace(" ", "+"))) : Date.now();
+  if (Number.isNaN(at)) return NextResponse.json({ error: "bad at" }, { status: 400 });
+  return NextResponse.json(await runBroadcasts(dry ? at : Date.now(), dry));
 }

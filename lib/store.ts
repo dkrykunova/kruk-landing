@@ -246,8 +246,9 @@ export async function pendingBrevoSync(limit = 50): Promise<string[]> {
 }
 
 // ── Розсилки прогріву ──────────────────────────────────────────────────────
-export const broadcastsEnabled = async () => (await kv.get<string>("broadcasts:enabled")) === "1";
-export const broadcastReady = async (id: string) => (await kv.get<string>(`broadcast:${id}:ready`)) === "1";
+// Upstash повертає "1" як число 1 — порівнюємо як рядок.
+export const broadcastsEnabled = async () => String(await kv.get("broadcasts:enabled")) === "1";
+export const broadcastReady = async (id: string) => String(await kv.get(`broadcast:${id}:ready`)) === "1";
 
 /** Одноразовий замок: true — якщо цей виклик першим «забрав» дію. */
 export const claimOnce = (key: string) => kv.set(key, new Date().toISOString(), { nx: true });
