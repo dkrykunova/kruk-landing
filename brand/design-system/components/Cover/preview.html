@@ -1,0 +1,68 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Крук</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;800&display=swap">
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--paper); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .ink { fill:var(--ink); }
+  .lilac { fill:var(--lilac); }
+  .butter { fill:var(--butter); }
+  .orange { fill:var(--orange); }
+  .dot { fill:var(--orange); }
+  .words { position:absolute; left:var(--space-10); bottom:var(--space-10); max-width:440px; }
+  .name { margin:0; font-size:120px; line-height:.92; font-weight:800; letter-spacing:-.025em; color:var(--ink); }
+  .tag { margin:var(--space-3) 0 0 6px; font-size:14px; line-height:20px; color:var(--ink-3); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      ink 176×288 bled off top and bottom (the brand's deep ground, largest) · lilac 128×184 · butter 160×232 bled off the right edge · one orange disc ⌀96 (the logo's full stop) — ≈40% of 960×288
+  arrangement one tall ink slab with satellites; lilac and butter bottoms on one line space-10 above the edge; space-4 gutters
+  pattern     discs, from the wordmark «крук.» whose orange full stop is the only mark in the brand: ⌀12 (space-3) dots at a space-8 pitch on the ink slab, two left out
+  scales      gutters space-4; pitch space-8; dot ⌀ space-3; corners radius-lg (lilac) and radius-xl (butter); disc and dots are circles, the brand's pill shape
+-->
+<rect class="ink" x="16" y="-8" width="176" height="304" rx="24"/>
+<circle class="dot" cx="48" cy="40" r="6"/>
+<circle class="dot" cx="80" cy="40" r="6"/>
+<circle class="dot" cx="112" cy="40" r="6"/>
+<circle class="dot" cx="48" cy="72" r="6"/>
+<circle class="dot" cx="80" cy="72" r="6"/>
+<circle class="dot" cx="112" cy="72" r="6"/>
+<circle class="dot" cx="144" cy="72" r="6"/>
+<circle class="dot" cx="48" cy="104" r="6"/>
+<circle class="dot" cx="80" cy="104" r="6"/>
+<circle class="dot" cx="112" cy="104" r="6"/>
+<circle class="dot" cx="144" cy="104" r="6"/>
+<circle class="dot" cx="48" cy="136" r="6"/>
+<circle class="dot" cx="80" cy="136" r="6"/>
+<circle class="dot" cx="112" cy="136" r="6"/>
+<circle class="dot" cx="144" cy="136" r="6"/>
+<circle class="dot" cx="48" cy="168" r="6"/>
+<circle class="dot" cx="80" cy="168" r="6"/>
+<circle class="dot" cx="112" cy="168" r="6"/>
+<circle class="dot" cx="144" cy="168" r="6"/>
+<circle class="dot" cx="80" cy="200" r="6"/>
+<circle class="dot" cx="112" cy="200" r="6"/>
+<circle class="dot" cx="144" cy="200" r="6"/>
+<rect class="lilac" x="208" y="64" width="128" height="184" rx="24"/>
+<rect class="butter" x="352" y="16" width="160" height="232" rx="32"/>
+<circle class="orange" cx="272" cy="64" r="48"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Крук</h1>
+<p class="tag">AI-агент для соцмереж. Українською.</p>
+</div>
+</div>
+</body>
+</html>

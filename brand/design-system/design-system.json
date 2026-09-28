@@ -1,0 +1,87 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-09-28T00:16:03Z"
+  },
+  "title": "Крук",
+  "namespace": "Kruk",
+  "libraries": [],
+  "sections": {},
+  "groups": [
+    "Logos",
+    "Avatars"
+  ],
+  "assetGroups": {
+    "Logos": {
+      "name": "Logos",
+      "tile": "l",
+      "order": [
+        "kruk-wordmark-ink.svg",
+        "kruk-wordmark-paper.svg",
+        "kruk-wordmark-mono-ink.svg"
+      ],
+      "files": {
+        "kruk-wordmark-ink.svg": {
+          "name": "kruk-wordmark-ink.svg",
+          "blob": "1d0f97de61cf26cc9c7c452368730af6",
+          "size": 2410,
+          "type": "image/svg+xml"
+        },
+        "kruk-wordmark-paper.svg": {
+          "name": "kruk-wordmark-paper.svg",
+          "blob": "adfe6b29407d753d926d8301af428cb4",
+          "size": 2410,
+          "type": "image/svg+xml"
+        },
+        "kruk-wordmark-mono-ink.svg": {
+          "name": "kruk-wordmark-mono-ink.svg",
+          "blob": "18f5922da5c9bda2831d2a557c0157cd",
+          "size": 2410,
+          "type": "image/svg+xml"
+        }
+      }
+    },
+    "Avatars": {
+      "name": "Avatars",
+      "tile": "m",
+      "order": [
+        "avatar-indigo.png",
+        "avatar-butter.png",
+        "avatar-lilac.png"
+      ],
+      "files": {
+        "avatar-indigo.png": {
+          "name": "avatar-indigo.png",
+          "blob": "bab97a8b918936b3797d6d319a08693e",
+          "size": 18524,
+          "type": "image/png"
+        },
+        "avatar-butter.png": {
+          "name": "avatar-butter.png",
+          "blob": "516dd9c1a54ac370e2b744b2548d0ff4",
+          "size": 18463,
+          "type": "image/png"
+        },
+        "avatar-lilac.png": {
+          "name": "avatar-lilac.png",
+          "blob": "268b2d0c7e4d493c12c0be3e59317b59",
+          "size": 18376,
+          "type": "image/png"
+        }
+      }
+    }
+  },
+  "blobs": {},
+  "docs": {
+    "readme": "project/README.md",
+    "sections": []
+  },
+  "lastChange": {
+    "by": "Daria",
+    "at": "2026-09-28T00:16:03Z",
+    "via": "Claude Code",
+    "note": "Перша версія брендбука з коду kruk.marketing: кольори, шрифти, логотип, компоненти, правила для соцмереж"
+  }
+}

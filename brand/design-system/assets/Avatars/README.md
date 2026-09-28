@@ -1,0 +1,1 @@
+Аватари Telegram 1024×1024 PNG. `avatar-indigo.png` — канал @kruk_ai (знак `butter` на `ink`, крапка `orange`). `avatar-butter.png` — бот @krukapp_bot (знак `ink` на `butter`). `avatar-lilac.png` — запасний (знак `ink` на `lilac`).
