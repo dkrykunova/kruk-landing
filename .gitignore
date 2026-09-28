@@ -14,3 +14,4 @@ secrets/
 .dev.vars
 .env.local.cf-build-hidden
 tools/visuals/fonts/
+brand/*.zip
