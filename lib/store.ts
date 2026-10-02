@@ -267,3 +267,33 @@ export async function pendingBotRecipients(broadcastId: string, limit: number): 
 export async function markBotSent(broadcastId: string, tgIds: number[]): Promise<void> {
   await kv.sadd(`broadcast:${broadcastId}:sent`, tgIds.map(String));
 }
+
+// ── Лічильники переходів ───────────────────────────────────────────────────
+/** +1 до лічильника за день (UTC). Повертає нове значення. */
+export async function countClick(name: string): Promise<number> {
+  const day = new Date().toISOString().slice(0, 10);
+  return kv.incrWindow(`clicks:${name}:${day}`, 400 * 24 * 3600_000);
+}
+
+// ── Заявки партнерів ───────────────────────────────────────────────────────
+export type PartnerApplication = {
+  id: string;
+  createdAt: string;
+  company: string;
+  website: string;
+  category: string;
+  description: string;
+  audience: string;
+  name: string;
+  role: string;
+  email: string;
+  contact: string;
+  consentAt: string;
+  utm: Utm;
+};
+
+export async function savePartnerApplication(a: PartnerApplication): Promise<void> {
+  await kv.set(`partner-app:${a.id}`, a);
+  await kv.zadd("partner-apps:all", Date.parse(a.createdAt), `partner-app:${a.id}`);
+  console.log("[partners] application", a.id, a.category);
+}

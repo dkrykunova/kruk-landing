@@ -93,3 +93,21 @@ export async function sendWelcomeEmail(email: string): Promise<void> {
     tags: ["welcome"],
   });
 }
+
+export async function sendPartnerConfirmation(email: string, companyName: string): Promise<void> {
+  const p = content.email.partner;
+  await brevo("/smtp/email", {
+    sender: SENDER,
+    to: [{ email }],
+    replyTo: { email: company.email },
+    subject: p.subject,
+    htmlContent: renderEmail({
+      title: p.title,
+      preheader: p.preheader,
+      body: p.body(companyName),
+      footerHtml: `© 2026 ${esc(company.legalName)} · <a href="${config.siteUrl}/privacy" style="color:#5e4a78">Політика конфіденційності</a>`,
+    }),
+    textContent: `${p.title}\n\n${p.body(companyName)}`,
+    tags: ["partner-application"],
+  });
+}

@@ -6,7 +6,7 @@ import { syncContact } from "@/lib/sync";
 import { verifyTurnstile } from "@/lib/turnstile-server";
 import type { WaitlistRequest, WaitlistResponse } from "@/lib/waitlist-types";
 
-const CONSENT_VERSION = "2026-10-01";
+const CONSENT_VERSION = "2026-10-02";
 
 function reply(body: WaitlistResponse, status = 200, headers?: HeadersInit) {
   return NextResponse.json(body, { status, headers });

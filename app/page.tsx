@@ -1,6 +1,6 @@
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { Agents, Audience, HowItWorks, Platforms, WhyUkraine } from "@/components/Sections";
+import { Audience, CrowbertBlock, KnowledgePreview, PartnersBlock, Pillars } from "@/components/Sections";
 import { Faq } from "@/components/Faq";
 import { FinalCta } from "@/components/FinalCta";
 import { Footer } from "@/components/Footer";
@@ -12,11 +12,11 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
-        <HowItWorks />
-        <Agents />
-        <Platforms />
+        <Pillars />
+        <KnowledgePreview />
+        <CrowbertBlock />
+        <PartnersBlock />
         <Audience />
-        <WhyUkraine />
         <Faq />
         <FinalCta />
       </main>

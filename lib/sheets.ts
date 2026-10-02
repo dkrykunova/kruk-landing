@@ -161,3 +161,33 @@ export async function sheetTitles(): Promise<string[]> {
   );
   return d.sheets.map((s) => s.properties.title);
 }
+
+// ── Довільний аркуш (заявки партнерів тощо) ────────────────────────────────
+const readyTabs = new Set<string>();
+
+/** Створює аркуш і рядок заголовків, якщо їх ще немає. */
+async function ensureTab(tab: string, header: string[]): Promise<void> {
+  if (readyTabs.has(tab)) return;
+  const titles = await sheetTitles();
+  if (!titles.includes(tab)) {
+    await api(":batchUpdate", { method: "POST", body: JSON.stringify({ requests: [{ addSheet: { properties: { title: tab } } }] }) });
+  }
+  const last = String.fromCharCode(64 + header.length);
+  const range = encodeURIComponent(`${tab}!A1:${last}1`);
+  const got = await api<{ values?: string[][] }>(`/values/${range}`);
+  if (!got.values?.[0]?.length) {
+    await api(`/values/${range}?valueInputOption=RAW`, { method: "PUT", body: JSON.stringify({ values: [header] }) });
+  }
+  readyTabs.add(tab);
+}
+
+/** Додає рядок у кінець аркуша tab (RAW — без виконання формул). */
+export async function appendRow(tab: string, header: string[], row: string[]): Promise<void> {
+  await ensureTab(tab, header);
+  const last = String.fromCharCode(64 + header.length);
+  const range = encodeURIComponent(`${tab}!A:${last}`);
+  await api(`/values/${range}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
+    method: "POST",
+    body: JSON.stringify({ values: [row] }),
+  });
+}

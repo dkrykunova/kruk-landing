@@ -5,6 +5,8 @@
       "name": "kruk-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
+        "--prefix",
+        "/Users/user/Projects/kruk-landing",
         "run",
         "dev"
       ],

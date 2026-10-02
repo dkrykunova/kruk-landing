@@ -6,7 +6,7 @@ import { syncContact } from "@/lib/sync";
 import { sendMessage, tg, type Keyboard } from "@/lib/telegram";
 
 const t = content.bot;
-const CONSENT_VERSION = "2026-10-01";
+const CONSENT_VERSION = "2026-10-02";
 const JOIN = "join"; // callback_data: "join" або "join:<token>"
 
 type TgUser = { id: number; first_name?: string; last_name?: string; username?: string };
@@ -87,6 +87,10 @@ async function handle(u: Update) {
   }
 
   const m = u.message;
+  // /chatid у групі — щоб підключити групу команди для сповіщень про заявки (TEAM_TG_CHAT_ID).
+  if (m && m.chat.type !== "private" && /^\/chatid(@\w+)?$/.test((m.text ?? "").trim())) {
+    return sendMessage(m.chat.id, `ID цієї групи: <code>${m.chat.id}</code>`);
+  }
   if (!m || m.chat.type !== "private") return;
   const [cmd, payload = ""] = (m.text ?? "").trim().split(/\s+/, 2);
 
