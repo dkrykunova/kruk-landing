@@ -17,7 +17,6 @@
   // Публічні змінні (не секрети). Секрети — через `wrangler secret bulk`.
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://kruk.marketing",
-    "NEXT_PUBLIC_LAUNCH_AT": "2026-10-19T10:00:00+03:00",
     "NEXT_PUBLIC_TG_BOT_USERNAME": "krukapp_bot",
     "NEXT_PUBLIC_TG_CHANNEL_URL": "https://t.me/kruk_ai"
   }

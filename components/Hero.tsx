@@ -1,5 +1,4 @@
 import { content } from "@/content/uk";
-import { Countdown } from "./Countdown";
 import { WaitlistForm } from "./WaitlistForm";
 
 export function Hero() {
@@ -21,9 +20,6 @@ export function Hero() {
             <span className="font-serif font-medium italic text-orange">{h.titleAccent}</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-2">{h.subtitle}</p>
-          <div className="mt-8">
-            <Countdown />
-          </div>
         </div>
 
         <div id="waitlist" className="scroll-mt-24 rounded-[2rem] border border-line bg-paper-2 p-5 sm:p-7">
