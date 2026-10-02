@@ -8,6 +8,7 @@ const t = content.cookies;
 
 function applyConsent(c: ConsentChoice) {
   window.gtag?.("consent", "update", { analytics_storage: c });
+  window.fbq?.("consent", c === "granted" ? "grant" : "revoke");
 }
 
 // Банер згоди на cookies: «Прийняти» вмикає analytics_storage для тегу Google з app/layout.tsx. Кнопка [data-cookie-settings] у футері відкриває банер знову.
