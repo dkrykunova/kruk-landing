@@ -17,7 +17,7 @@ import {
   releaseClaim,
   unsubscribeTg,
 } from "./store";
-import { sendMessage } from "./telegram";
+import { sendMessage, sendPhotos } from "./telegram";
 
 const BATCH = 15; // підписників за один виклик
 const MAX_LATE = 12 * 3600_000; // не надсилати, якщо запізнилися більше ніж на 12 год
@@ -59,7 +59,9 @@ export async function runBroadcasts(now = Date.now(), dry = false) {
 
     if (b.channel && (await claimOnce(`broadcast:${b.id}:channel`))) {
       try {
-        await sendMessage(config.tgChannelUrl.replace("https://t.me/", "@"), fill(b.channel));
+        const chat = config.tgChannelUrl.replace("https://t.me/", "@");
+        if (b.photos?.length) await sendPhotos(chat, b.photos, fill(b.channel));
+        else await sendMessage(chat, fill(b.channel));
         report[b.id] = "канал ✓";
       } catch (e) {
         await releaseClaim(`broadcast:${b.id}:channel`);

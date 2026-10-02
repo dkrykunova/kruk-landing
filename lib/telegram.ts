@@ -30,3 +30,12 @@ export function sendMessage(chatId: number | string, text: string, keyboard?: Ke
     ...(keyboard && { reply_markup: keyboard }),
   });
 }
+
+/** Пост з картинками: одна — фото з підписом, кілька — альбом (підпис на першій). */
+export function sendPhotos(chatId: number | string, photos: string[], caption: string) {
+  if (photos.length === 1) return tg("sendPhoto", { chat_id: chatId, photo: photos[0], caption, parse_mode: "HTML" });
+  return tg("sendMediaGroup", {
+    chat_id: chatId,
+    media: photos.map((url, i) => ({ type: "photo", media: url, ...(i === 0 && { caption, parse_mode: "HTML" }) })),
+  });
+}
