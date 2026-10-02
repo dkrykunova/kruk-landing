@@ -4,7 +4,7 @@
   "main": "worker.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS", "html_handling": "none" },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "kruk-landing" }],
   "observability": { "enabled": true },
   "workers_dev": false,
