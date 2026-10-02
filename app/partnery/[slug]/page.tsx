@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { CouponCopy } from "@/components/CouponCopy";
 import { PartnerLink } from "@/components/PartnerLink";
 import { content, partnerCategories } from "@/content/uk";
 import { listArticles } from "@/lib/articles";
@@ -63,6 +64,16 @@ export default async function PartnerPage({ params }: Props) {
             <p className="max-w-sm text-sm text-ink-3">{t.disclosure}</p>
           </div>
         </section>
+
+        {(p.offer || p.coupon) && (
+          <section className="mx-auto max-w-4xl px-4 pb-12 sm:px-6">
+            <div className="rounded-3xl bg-butter p-6 sm:p-8">
+              <h2 className="text-2xl font-bold text-ink">{t.offer}</h2>
+              {p.offer && <p className="mt-2 text-ink">{p.offer}</p>}
+              {p.coupon && <div className="mt-5"><CouponCopy code={p.coupon} /></div>}
+            </div>
+          </section>
+        )}
 
         {p.about && (
           <section className="mx-auto max-w-4xl px-4 pb-12 sm:px-6">

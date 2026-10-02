@@ -78,6 +78,8 @@ export default config({
         steps: fields.array(fields.text({ label: "Крок" }), { label: "Як почати", itemLabel: (p) => p.value }),
         pricing: fields.text({ label: "Ціни й пробний період", multiline: true }),
         good: fields.text({ label: "Варто знати (мова, ринок, обмеження)", multiline: true }),
+        offer: fields.text({ label: "Пропозиція для читачів Крука (необов'язково)", multiline: true }),
+        coupon: fields.text({ label: "Промокод партнера (необов'язково)" }),
         refUrl: fields.url({ label: "Реферальне посилання", validation: { isRequired: true } }),
         ctaLabel: fields.text({ label: "Текст кнопки", defaultValue: "Спробувати безкоштовно" }),
         checkedAt: fields.date({ label: "Інформацію перевірено" }),
