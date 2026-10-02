@@ -14,11 +14,17 @@
     "cf:deploy": "sh scripts/cf-build.sh && opennextjs-cloudflare deploy"
   },
   "dependencies": {
+    "@keystar/ui": "~0.10.0",
+    "@keystatic/core": "^0.6.9",
+    "@keystatic/next": "^5.0.5",
+    "@markdoc/markdoc": "^0.4.0",
     "@opennextjs/cloudflare": "^1.20.6",
     "@upstash/redis": "^1.39.0",
     "next": "^16.3.6",
     "react": "^19.3.0",
+    "react-aria": "3.50.0",
     "react-dom": "^19.3.0",
+    "react-stately": "3.48.0",
     "server-only": "^0.0.1"
   },
   "devDependencies": {

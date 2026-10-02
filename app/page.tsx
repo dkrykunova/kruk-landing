@@ -1,10 +1,11 @@
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { Audience, CrowbertBlock, KnowledgePreview, PartnersBlock, Pillars } from "@/components/Sections";
-import { Faq } from "@/components/Faq";
+import { FrontStories, Rubrics, SectionTeasers } from "@/components/Front";
 import { FinalCta } from "@/components/FinalCta";
 import { Footer } from "@/components/Footer";
 import { jsonLd } from "@/lib/jsonld";
+
+export const dynamic = "force-static";
 
 export default function Home() {
   return (
@@ -12,12 +13,9 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
-        <Pillars />
-        <KnowledgePreview />
-        <CrowbertBlock />
-        <PartnersBlock />
-        <Audience />
-        <Faq />
+        <FrontStories />
+        <Rubrics />
+        <SectionTeasers />
         <FinalCta />
       </main>
       <Footer />

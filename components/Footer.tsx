@@ -19,6 +19,10 @@ export function Footer() {
           </p>
         </div>
         <nav className="flex flex-col gap-2 text-sm text-ink-2 md:items-end">
+          <a href="/znannya" className={link}>Знання</a>
+          <a href="/crowbert" className={link}>AI-агент Crowbert</a>
+          <a href="/partnery" className={link}>Партнери</a>
+          <a href="/pro-kruk" className={link}>Про Крук</a>
           <a href="/privacy" className={link}>{f.privacy}</a>
           <a href="/consent" className={link}>{f.consent}</a>
           <a href="/partnery/staty-partnerom" className={link}>{f.partner}</a>
