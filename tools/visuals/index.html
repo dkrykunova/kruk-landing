@@ -186,7 +186,12 @@ const SETS2 = [
   { name: "post-09", theme: "ink", slides: [{ title: "5 приводів написати клієнту — і *не* стати спамом", titleTop: 300 }] },
   { name: "post-10", theme: "paper", slides: [{ title: "Нові клієнти приходили. *Удруге* — майже ніхто", titleTop: 300 }] },
 ];
-const PACK = new URLSearchParams(location.search).get("pack") === "02" ? SETS2 : SETS;
+// ── LinkedIn (?pack=li) — перший пост сторінки, 1080×1350 ──
+const SETS_LI = [
+  { name: "li-01", theme: "ink", slides: [{ title: "Усе для росту малого бізнесу — *в одному місці*", titleTop: 400, body: "Знання про маркетинг і продажі, AI-агент для соцмереж і перевірені партнери." }] },
+];
+const PACKS = { "02": SETS2, li: SETS_LI };
+const PACK = PACKS[new URLSearchParams(location.search).get("pack")] ?? SETS;
 
 (async () => {
   await document.fonts.load('500 40px "Nyght Serif"'); await document.fonts.load('italic 500 40px "Nyght Serif"');

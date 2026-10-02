@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Крук — обкладинка LinkedIn</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;600;800&display=swap">
+<style>
+  @font-face { font-family: "Nyght Serif"; src: url(fonts/NyghtSerif-Medium.ttf); font-weight: 500; font-style: normal; }
+  @font-face { font-family: "Nyght Serif"; src: url(fonts/NyghtSerif-MediumItalic.ttf); font-weight: 500; font-style: italic; }
+  body { margin: 0; background: #ddd; } canvas { width: 1128px; display: block; margin: 12px; }
+</style>
+</head>
+<body>
+<div id="log">render…</div>
+<script>
+// Обкладинка сторінки компанії LinkedIn 1128×191, рендер ×2 = 2256×382.
+// Ліворуч унизу обкладинку перекриває логотип компанії — текст починається від x 520 (×2); блоки — праворуч, декоративно.
+const C = { paper: "#fffdf0", ink: "#23003f", ink2: "#3b1a5e", lilac: "#bcacce", butter: "#fffdb4", orange: "#f94500" };
+const W = 2256, H = 382, X = 520;
+
+(async () => {
+  for (const f of ['500 40px "Nyght Serif"', 'italic 500 40px "Nyght Serif"', "400 40px Commissioner", "600 40px Commissioner"]) await document.fonts.load(f, "Усе для росту малого бізнесу");
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H; document.body.appendChild(cv);
+  const ctx = cv.getContext("2d"); ctx.fontKerning = "normal";
+  ctx.fillStyle = C.ink; ctx.fillRect(0, 0, W, H);
+
+  // Блоки бренду праворуч — як на обкладинці Facebook
+  ctx.fillStyle = C.ink2; ctx.beginPath(); ctx.roundRect(1880, -40, 120, 300, 32); ctx.fill();
+  for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) { ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(1908 + c * 32, 36 + r * 44, 6, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = C.lilac; ctx.beginPath(); ctx.roundRect(2024, 60, 132, 260, 32); ctx.fill();
+  ctx.fillStyle = C.butter; ctx.beginPath(); ctx.roundRect(1880, 290, 420, 160, 32); ctx.fill();
+  ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(2190, 250, 52, 0, Math.PI * 2); ctx.fill();
+
+  // Заголовок одним рядком: Nyght Serif, акцент — курсив orange
+  const size = 96, y = 192;
+  ctx.letterSpacing = "-0.5px";
+  ctx.font = `500 ${size}px "Nyght Serif"`; ctx.fillStyle = C.paper;
+  const a = "Усе для росту "; ctx.fillText(a, X, y); const aw = ctx.measureText(a).width;
+  ctx.font = `italic 500 ${size}px "Nyght Serif"`; ctx.fillStyle = C.orange;
+  const b = "малого бізнесу"; ctx.fillText(b, X + aw, y); const right = X + aw + ctx.measureText(b).width;
+  ctx.letterSpacing = "0px";
+
+  // Підрядок
+  ctx.font = `400 34px Commissioner`; ctx.fillStyle = "rgba(255,253,240,0.8)";
+  ctx.fillText("Знання про маркетинг і продажі, AI-агент для соцмереж, перевірені партнери", X, y + 74);
+  const sub = X + ctx.measureText("Знання про маркетинг і продажі, AI-агент для соцмереж, перевірені партнери").width;
+
+  const blob = await new Promise((r) => cv.toBlob(r, "image/png"));
+  const res = await fetch("/save?name=li-cover.png", { method: "POST", body: blob });
+  document.getElementById("log").textContent = `saved ${res.status} · title right ${Math.round(right)} · sub right ${Math.round(sub)}`;
+  window.__done = true;
+})();
+</script>
+</body>
+</html>

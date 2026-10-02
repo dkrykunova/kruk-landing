@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Commissioner } from "next/font/google";
 import localFont from "next/font/local";
+import { Consent } from "@/components/Consent";
 import { content } from "@/content/uk";
 import { config } from "@/lib/config";
 import "./globals.css";
@@ -49,7 +50,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="uk" className={`${commissioner.variable} ${nyght.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Consent />
+      </body>
     </html>
   );
 }

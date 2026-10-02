@@ -26,7 +26,7 @@ export function Footer() {
           <a href="/privacy" className={link}>{f.privacy}</a>
           <a href="/consent" className={link}>{f.consent}</a>
           <a href="/partnery/staty-partnerom" className={link}>{f.partner}</a>
-          {/* Етап 3: відкриває банер згоди на cookies */}
+          {/* Відкриває банер згоди на cookies (components/Consent.tsx) */}
           <button type="button" data-cookie-settings className={`text-left ${link}`}>{f.cookies}</button>
           {config.tgChannelUrl && (
             <a href={config.tgChannelUrl} target="_blank" rel="noopener" className={link}>{f.channel}</a>
