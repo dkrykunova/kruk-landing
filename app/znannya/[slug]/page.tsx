@@ -8,6 +8,7 @@ import { WaitlistForm } from "@/components/WaitlistForm";
 import { content, partnerCategories } from "@/content/uk";
 import { getArticle, listArticles, topicLabel, typeLabel } from "@/lib/articles";
 import { config } from "@/lib/config";
+import { listPartners, type Partner } from "@/lib/partners";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 const fmt = (d: string) => new Intl.DateTimeFormat("uk-UA", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Kyiv" }).format(new Date(d));
 
-function Cta({ kind, slug }: { kind: string; slug: string }) {
+function Cta({ kind, slug, partners }: { kind: string; slug: string; partners: Partner[] }) {
   if (kind === "crowbert") {
     const c = content.crowbert;
     return (
@@ -60,6 +61,12 @@ function Cta({ kind, slug }: { kind: string; slug: string }) {
         <p className="text-sm font-semibold uppercase tracking-wider">Партнери Крука · {cat.name}</p>
         <p className="mt-3 text-2xl font-bold">{content.partners.subtitle}</p>
         <p className="mt-2">{cat.text}</p>
+        {partners.filter((x) => x.category === kind).map((x) => (
+          <a key={x.slug} href={`/partnery/${x.slug}`} className="mt-4 block rounded-2xl bg-white p-4 hover:bg-paper">
+            <p className="font-bold">{x.name} →</p>
+            <p className="mt-1 text-sm text-ink-2">{x.tagline}</p>
+          </a>
+        ))}
         <a href="/partnery" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-ink px-6 font-semibold text-paper hover:bg-ink-2">
           {content.partners.title}
         </a>
@@ -120,7 +127,7 @@ export default async function ArticlePage({ params }: Props) {
           <ShareButtons url={url} title={entry.title} />
         </div>
         <div className="mt-10">
-          <Cta kind={entry.cta} slug={slug} />
+          <Cta kind={entry.cta} slug={slug} partners={await listPartners()} />
         </div>
         {related.length > 0 && (
           <section className="mt-14">

@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { SectionTitle } from "@/components/SectionTitle";
 import { content, partnerCategories } from "@/content/uk";
+import { listPartners } from "@/lib/partners";
 
 const s = content.partners;
 const p = content.partnersPage;
@@ -13,7 +14,10 @@ export const metadata: Metadata = {
   alternates: { canonical: "/partnery" },
 };
 
-export default function PartnersPage() {
+export const dynamic = "force-static";
+
+export default async function PartnersPage() {
+  const partners = await listPartners();
   return (
     <>
       <Header />
@@ -22,13 +26,30 @@ export default function PartnersPage() {
           <h1 className="font-serif text-5xl font-medium leading-[1.05] tracking-tight text-ink sm:text-7xl">{s.title}</h1>
           <p className="mt-5 max-w-2xl text-lg text-ink-2">{p.intro}</p>
           <ul className="mt-10 grid gap-4 sm:grid-cols-2">
-            {partnerCategories.map((c) => (
-              <li key={c.id} className="rounded-3xl border border-line bg-white p-6">
-                <span className="inline-block rounded-full bg-paper-2 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-ink-3">{s.soon}</span>
-                <h2 className="mt-4 text-2xl font-bold text-ink">{c.name}</h2>
-                <p className="mt-2 text-ink-2">{c.text}</p>
-              </li>
-            ))}
+            {partnerCategories.map((c) => {
+              const list = partners.filter((x) => x.category === c.id);
+              return (
+                <li key={c.id} className="rounded-3xl border border-line bg-white p-6">
+                  {list.length === 0 && (
+                    <span className="mb-4 inline-block rounded-full bg-paper-2 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-ink-3">{s.soon}</span>
+                  )}
+                  <h2 className="text-2xl font-bold text-ink">{c.name}</h2>
+                  <p className="mt-2 text-ink-2">{c.text}</p>
+                  {list.length > 0 && (
+                    <ul className="mt-5 grid gap-3">
+                      {list.map((x) => (
+                        <li key={x.slug}>
+                          <a href={`/partnery/${x.slug}`} className="block rounded-2xl bg-butter p-4 transition hover:bg-butter/70">
+                            <p className="font-bold text-ink">{x.name} →</p>
+                            <p className="mt-1 text-sm text-ink">{x.tagline}</p>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
 
