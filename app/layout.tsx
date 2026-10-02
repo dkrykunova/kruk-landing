@@ -3,6 +3,7 @@ import { Commissioner } from "next/font/google";
 import localFont from "next/font/local";
 import { Consent } from "@/components/Consent";
 import { content } from "@/content/uk";
+import { CONSENT_KEY, GA_ID } from "@/lib/analytics";
 import { config } from "@/lib/config";
 import "./globals.css";
 
@@ -50,6 +51,20 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="uk" className={`${commissioner.variable} ${nyght.variable}`}>
+      {GA_ID && (
+        <head>
+          {/* Google tag у режимі згоди (Consent Mode v2): без «Прийняти» cookies не ставляться. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+var g="denied";try{if(localStorage.getItem("${CONSENT_KEY}")==="granted")g="granted"}catch(e){}
+gtag("consent","default",{analytics_storage:g,ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied"});
+gtag("js",new Date());gtag("config","${GA_ID}");`,
+            }}
+          />
+          <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+        </head>
+      )}
       <body>
         {children}
         <Consent />

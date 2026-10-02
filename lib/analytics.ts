@@ -1,4 +1,4 @@
-// Аналітика: GA4 (gtag) вмикається лише після згоди на cookies (components/Consent.tsx).
+// Аналітика: тег GA4 у app/layout.tsx працює в Consent Mode; повний збір — після згоди (components/Consent.tsx).
 
 type Params = Record<string, string | number | boolean | undefined>;
 
@@ -30,7 +30,7 @@ export function saveConsent(choice: ConsentChoice): void {
   window.dispatchEvent(new CustomEvent(CONSENT_EVENT, { detail: choice }));
 }
 
-// Без згоди подія нікуди не надсилається.
+// Без згоди gtag надсилає подію без cookies (Consent Mode).
 export function track(event: string, params: Params = {}): void {
   try {
     if (process.env.NODE_ENV !== "production") console.debug("[track]", event, params);

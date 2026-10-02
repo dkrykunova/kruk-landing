@@ -2,36 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { content } from "@/content/uk";
-import { CONSENT_EVENT, GA_ID, readConsent, saveConsent, type ConsentChoice } from "@/lib/analytics";
+import { CONSENT_EVENT, readConsent, saveConsent, type ConsentChoice } from "@/lib/analytics";
 
 const t = content.cookies;
 
-function loadGa() {
-  if (!GA_ID || window.gtag) return;
-  window.dataLayer = window.dataLayer ?? [];
-  window.gtag = function gtag() {
-    // eslint-disable-next-line prefer-rest-params
-    window.dataLayer!.push(arguments);
-  };
-  window.gtag("js", new Date());
-  window.gtag("config", GA_ID);
-  const s = document.createElement("script");
-  s.async = true;
-  s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
-  document.head.appendChild(s);
+function applyConsent(c: ConsentChoice) {
+  window.gtag?.("consent", "update", { analytics_storage: c });
 }
 
-// Банер згоди на cookies + завантаження GA4 після «Прийняти». Кнопка [data-cookie-settings] у футері відкриває банер знову.
+// Банер згоди на cookies: «Прийняти» вмикає analytics_storage для тегу Google з app/layout.tsx. Кнопка [data-cookie-settings] у футері відкриває банер знову.
 export function Consent() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const choice = readConsent();
-    if (choice === "granted") loadGa();
     if (!choice) setOpen(true);
-    const onChoice = (e: Event) => {
-      if ((e as CustomEvent<ConsentChoice>).detail === "granted") loadGa();
-    };
+    const onChoice = (e: Event) => applyConsent((e as CustomEvent<ConsentChoice>).detail);
     const onSettings = (e: MouseEvent) => {
       if ((e.target as Element | null)?.closest("[data-cookie-settings]")) setOpen(true);
     };
@@ -46,11 +32,8 @@ export function Consent() {
   if (!open) return null;
 
   const choose = (c: ConsentChoice) => {
-    const was = readConsent();
     saveConsent(c);
     setOpen(false);
-    // Відкликання згоди: GA вже завантажений — перезавантажуємо сторінку, щоб він зник.
-    if (was === "granted" && c === "denied") location.reload();
   };
 
   return (
