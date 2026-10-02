@@ -11,9 +11,6 @@ export function Hero() {
             <span className="rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-ink-3">
               {h.eyebrow}
             </span>
-            <span className="rounded-full bg-lilac px-3 py-1 text-sm font-semibold text-ink">
-              🎁 {content.offer.badge}
-            </span>
           </div>
           <h1 className="mt-6 text-[2.6rem] font-extrabold leading-[1.02] tracking-tight text-ink sm:text-6xl lg:text-7xl">
             {h.title}{" "}
