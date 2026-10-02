@@ -173,13 +173,28 @@ const SETS = [
   ]},
 ];
 
+// ── Контент-пакет №2 (?pack=02) — по одному візуалу на пост, тексти з дока пакета ──
+const SETS2 = [
+  { name: "post-01", theme: "ink", slides: [{ title: "У вашого профілю є *10 секунд,* щоб клієнт написав", titleTop: 300 }] },
+  { name: "post-02", theme: "paper", slides: [{ title: "Меню можна знайти будь-де. *Атмосферу* — лише у вас", titleTop: 300 }] },
+  { name: "post-03", theme: "lilac", slides: [{ title: "«Підпишіться» — слабкий аргумент. *Користь* — сильний", titleTop: 300 }] },
+  { name: "post-04", theme: "butter", slides: [{ title: "Не всі канали одразу. *Один,* але доведений до заявок", titleTop: 300 }] },
+  { name: "post-05", theme: "ink", slides: [{ title: "Реклама привела заявки. *Повільні відповіді* їх загубили", titleTop: 300 }] },
+  { name: "post-06", theme: "paper", slides: [{ title: "Клієнт пише вам — і ще *двом* конкурентам", titleTop: 300 }] },
+  { name: "post-07", theme: "lilac", slides: [{ title: "На «скільки коштує» відповідали *цифрою.* Клієнти зникали", titleTop: 300 }] },
+  { name: "post-08", theme: "butter", slides: [{ title: "Скарга — це шанс. *4 кроки,* щоб ним скористатися", titleTop: 300 }] },
+  { name: "post-09", theme: "ink", slides: [{ title: "5 приводів написати клієнту — і *не* стати спамом", titleTop: 300 }] },
+  { name: "post-10", theme: "paper", slides: [{ title: "Нові клієнти приходили. *Удруге* — майже ніхто", titleTop: 300 }] },
+];
+const PACK = new URLSearchParams(location.search).get("pack") === "02" ? SETS2 : SETS;
+
 (async () => {
   await document.fonts.load('500 40px "Nyght Serif"'); await document.fonts.load('italic 500 40px "Nyght Serif"');
   await document.fonts.load("400 40px Commissioner"); await document.fonts.load("600 40px Commissioner"); await document.fonts.load("800 40px Commissioner");
   await document.fonts.load("400 40px Commissioner", "крук"); await document.fonts.load("800 40px Commissioner", "крук");
   const grid = document.getElementById("grid"), log = [];
   const save = location.hash === "#save";
-  for (const set of SETS) {
+  for (const set of PACK) {
     for (let i = 0; i < set.slides.length; i++) {
       const spec = { theme: set.theme, eyebrow: set.eyebrow, w: set.w, h: set.h, ...set.slides[i] };
       const cv = frame(spec, i, set.slides.length); grid.appendChild(cv);
