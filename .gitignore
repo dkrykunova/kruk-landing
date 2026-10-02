@@ -15,3 +15,7 @@ secrets/
 .env.local.cf-build-hidden
 tools/visuals/fonts/
 brand/*.zip
+
+# Дублікати від iCloud
+* 2
+* 2.*
