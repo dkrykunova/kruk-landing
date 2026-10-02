@@ -27,6 +27,7 @@ const fill = (text: string, promo = "") =>
 
 /** Чи можна вже надсилати: немає заглушок, виконані вимоги. */
 async function isSendable(b: Broadcast): Promise<string | null> {
+  if (b.paused) return `призупинено: ${b.paused}`;
   const texts = [b.channel, b.bot].filter(Boolean).join("\n");
   if (/\[[А-ЯІЇЄҐA-Z][^\]]*\]/.test(texts)) return "у тексті лишилась заглушка [...]";
   if (b.requires?.includes("signupUrl") && !config.platformSignupUrl) return "немає PLATFORM_SIGNUP_URL";

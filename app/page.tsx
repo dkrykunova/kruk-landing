@@ -1,7 +1,6 @@
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Agents, Audience, HowItWorks, Platforms, WhyUkraine } from "@/components/Sections";
-import { Pricing } from "@/components/Pricing";
 import { Faq } from "@/components/Faq";
 import { FinalCta } from "@/components/FinalCta";
 import { Footer } from "@/components/Footer";
@@ -18,7 +17,6 @@ export default function Home() {
         <Platforms />
         <Audience />
         <WhyUkraine />
-        <Pricing />
         <Faq />
         <FinalCta />
       </main>
