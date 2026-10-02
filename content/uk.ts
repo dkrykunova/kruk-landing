@@ -5,7 +5,7 @@ export const company = {
   legalName: "ТОВ «КРУК БЮРО»",
   edrpou: "46171446",
   email: "info@kruk.marketing",
-  address: "", // TODO: юридична адреса
+  address: "08205, Київська обл., Бучанський р-н, м. Ірпінь, вул. Миколи Руденка, буд. 1б, кв. 27",
 };
 
 export const content = {
