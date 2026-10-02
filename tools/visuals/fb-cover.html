@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Крук — обкладинка Facebook</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@600;800&display=swap">
+<style>
+  @font-face { font-family: "Nyght Serif"; src: url(fonts/NyghtSerif-Medium.ttf); font-weight: 500; font-style: normal; }
+  @font-face { font-family: "Nyght Serif"; src: url(fonts/NyghtSerif-MediumItalic.ttf); font-weight: 500; font-style: italic; }
+  body { margin: 0; background: #ddd; } canvas { width: 820px; display: block; margin: 12px; }
+</style>
+</head>
+<body>
+<div id="log">render…</div>
+<script>
+// Обкладинка сторінки Facebook 1640×624 (показ 820×312 на десктопі).
+// На телефоні видно центр ≈1110px (x 265–1375) — текст і кнопка лише там; блоки — праворуч, декоративно.
+const C = { paper: "#fffdf0", ink: "#23003f", ink2: "#3b1a5e", lilac: "#bcacce", butter: "#fffdb4", orange: "#f94500" };
+const W = 1640, H = 624, SAFE_L = 300;
+
+(async () => {
+  for (const f of ['500 40px "Nyght Serif"', 'italic 500 40px "Nyght Serif"', "600 40px Commissioner", "800 40px Commissioner"]) await document.fonts.load(f, "Соцмережі а не дні");
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H; document.body.appendChild(cv);
+  const ctx = cv.getContext("2d"); ctx.fontKerning = "normal";
+  ctx.fillStyle = C.ink; ctx.fillRect(0, 0, W, H);
+
+  // Блоки бренду праворуч (як на обкладинці брендбука): лаванда, масло, помаранчеве коло-«крапка», сітка крапок
+  ctx.fillStyle = C.ink2; ctx.beginPath(); ctx.roundRect(1392, -40, 132, 520, 32); ctx.fill();
+  for (let r = 0; r < 9; r++) for (let c = 0; c < 3; c++) { ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(1424 + c * 34, 40 + r * 48, 6, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = C.lilac; ctx.beginPath(); ctx.roundRect(1540, 120, 140, 300, 32); ctx.fill();
+  ctx.fillStyle = C.butter; ctx.beginPath(); ctx.roundRect(1392, 500, 300, 160, 32); ctx.fill();
+  ctx.fillStyle = C.orange; ctx.beginPath(); ctx.arc(1560, 470, 56, 0, Math.PI * 2); ctx.fill();
+
+  // Заголовок: Nyght Serif, акцент — курсив orange
+  const size = 90, x = SAFE_L, y0 = 160;
+  ctx.font = `500 ${size}px "Nyght Serif"`; ctx.fillStyle = C.paper; ctx.letterSpacing = "-0.5px";
+  ctx.fillText("Соцмережі за хвилини,", x, y0 + size * 0.9);
+  ctx.font = `italic 500 ${size}px "Nyght Serif"`; ctx.fillStyle = C.orange;
+  ctx.fillText("а не дні", x, y0 + size * 0.9 + size * 1.06);
+  ctx.letterSpacing = "0px";
+
+  // Кнопка-заклик
+  const label = "Ранній доступ — kruk.marketing", fs = 36;
+  ctx.font = `600 ${fs}px Commissioner`; const tw = ctx.measureText(label).width, ph = fs * 2.4, pw = tw + fs * 1.8, py = 418;
+  ctx.fillStyle = C.orange; ctx.beginPath(); ctx.roundRect(x, py, pw, ph, ph / 2); ctx.fill();
+  ctx.fillStyle = C.ink; ctx.textBaseline = "middle"; ctx.fillText(label, x + fs * 0.9, py + ph / 2 + 2);
+
+  const blob = await new Promise((r) => cv.toBlob(r, "image/png"));
+  const res = await fetch("/save?name=fb-cover.png", { method: "POST", body: blob });
+  document.getElementById("log").textContent = "saved " + res.status + " · text right edge " + Math.round(x + Math.max(pw, 0)) + " · headline width " + (() => { ctx.font = `500 ${size}px "Nyght Serif"`; return Math.round(ctx.measureText("Соцмережі за хвилини,").width); })();
+  // Лише для перегляду (вже після збереження): межі видимого на телефоні центру
+  ctx.setLineDash([12, 10]); ctx.lineWidth = 3; ctx.strokeStyle = "#00c2ff";
+  for (const gx of [265, 1375]) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke(); }
+  window.__done = true;
+})();
+</script>
+</body>
+</html>
