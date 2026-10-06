@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${a.title} — Крук`,
     description: a.excerpt,
     alternates: { canonical: `/znannya/${slug}` },
-    openGraph: { title: a.title, description: a.excerpt, type: "article", url: `/znannya/${slug}`, ...(a.cover ? { images: [a.cover] } : {}) },
+    openGraph: { title: a.title, description: a.excerpt, type: "article", url: `/znannya/${slug}`, images: [a.cover ?? "/opengraph-image.png"] },
   };
 }
 
@@ -127,7 +127,7 @@ export default async function ArticlePage({ params }: Props) {
           <ArticleBody node={node} />
         </article>
         <div className="mt-10">
-          <ShareButtons url={url} title={entry.title} />
+          <ShareButtons url={url} title={entry.title} slug={slug} theme={[...slug].reduce((n, ch) => n + ch.charCodeAt(0), 0)} />
         </div>
         <div className="mt-10">
           <Cta kind={entry.cta} slug={slug} partners={await listPartners()} />
