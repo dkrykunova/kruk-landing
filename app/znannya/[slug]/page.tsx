@@ -100,7 +100,10 @@ export default async function ArticlePage({ params }: Props) {
     headline: entry.title,
     description: entry.excerpt,
     datePublished: entry.date,
-    author: { "@type": "Person", name: entry.author },
+    author: entry.author.startsWith("Редакція")
+      ? { "@type": "Organization", name: entry.author, url: config.siteUrl }
+      : { "@type": "Person", name: entry.author },
+    inLanguage: "uk",
     publisher: { "@type": "Organization", name: "Крук", url: config.siteUrl },
     mainEntityOfPage: url,
   };

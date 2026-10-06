@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
 import { company } from "@/content/uk";
 
-export const metadata: Metadata = { title: "Політика конфіденційності — Крук" };
+export const metadata: Metadata = {
+  title: "Політика конфіденційності — Крук",
+  description: "Які дані збирає Крук, навіщо, кому передає й як довго зберігає. Ваші права й налаштування cookies.",
+  alternates: { canonical: "/privacy" },
+};
 
 // ЧЕРНЕТКА-ЗАГЛУШКА. Остаточний текст надає юрист замовника.
 export default function Privacy() {

@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!p) return {};
   const title = `${p.name} — ${p.tagline}`;
   return {
-    title: `${title} — Крук`,
+    title: `${p.name}: огляд, ціни й кому підійде — Крук`,
     description: p.summary,
     alternates: { canonical: `/partnery/${p.slug}` },
     openGraph: { title, description: p.summary, url: `/partnery/${p.slug}` },
@@ -181,11 +181,14 @@ export default async function PartnerPage({ params }: Props) {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            name: p.name,
+            "@type": "WebPage",
+            name: `${p.name} — ${p.tagline}`,
             description: p.summary,
-            applicationCategory: "BusinessApplication",
             url: `${config.siteUrl}/partnery/${p.slug}`,
+            inLanguage: "uk",
+            about: { "@type": "Thing", name: p.name },
+            publisher: { "@type": "Organization", name: "Крук", url: config.siteUrl },
+            ...(p.checkedAt ? { dateModified: p.checkedAt } : {}),
           }),
         }}
       />

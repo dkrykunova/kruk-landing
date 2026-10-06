@@ -8,7 +8,7 @@ import { TOPICS, TYPES } from "../../keystatic.config";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Знання — Крук",
+  title: "Знання: маркетинг і продажі для малого бізнесу — Крук",
   description: "Поради, кейси й новини з маркетингу та продажів для малого й середнього бізнесу.",
   alternates: { canonical: "/znannya" },
 };

@@ -6,7 +6,7 @@ import { content, partnerCategories } from "@/content/uk";
 
 const t = content.partnerForm;
 
-export const metadata: Metadata = { title: t.metaTitle, alternates: { canonical: "/partnery/staty-partnerom" } };
+export const metadata: Metadata = { title: t.metaTitle, description: t.metaDescription, alternates: { canonical: "/partnery/staty-partnerom" } };
 
 export default function BecomePartner() {
   return (

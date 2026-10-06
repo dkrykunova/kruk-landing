@@ -5,11 +5,13 @@ import { default as handler } from "./.open-next/worker.js";
 type Env = { CRON_SECRET?: string; NEXT_PUBLIC_SITE_URL?: string };
 
 export default {
-  // www.kruk.marketing → kruk.marketing (301), решта — сайт Next.js.
+  // http → https і www.kruk.marketing → kruk.marketing одним 301, решта — сайт Next.js.
   fetch(req: Request, env: Env, ctx: unknown) {
     const url = new URL(req.url);
-    if (url.hostname.startsWith("www.")) {
-      url.hostname = url.hostname.slice(4);
+    const local = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+    if (!local && (url.protocol === "http:" || url.hostname.startsWith("www."))) {
+      url.protocol = "https:";
+      url.hostname = url.hostname.replace(/^www\./, "");
       return Response.redirect(url.toString(), 301);
     }
     return handler.fetch(req, env, ctx);

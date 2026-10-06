@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
 import { company } from "@/content/uk";
 
-export const metadata: Metadata = { title: "Згода на обробку персональних даних — Крук" };
+export const metadata: Metadata = {
+  title: "Згода на обробку персональних даних — Крук",
+  description: "Текст згоди на обробку персональних даних під час підписки на матеріали Крука чи заявки партнера.",
+  alternates: { canonical: "/consent" },
+};
 
 // ЧЕРНЕТКА-ЗАГЛУШКА. Остаточний текст надає юрист замовника.
 export default function Consent() {

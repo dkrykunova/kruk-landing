@@ -115,7 +115,7 @@ function frame(spec, i, n) {
   const titleTop = (spec.titleTop ?? 250) + safe;
   const bottomReserve = (spec.cta ? 330 : 200) + safe;
   let y = drawTitle(ctx, th, spec.title, { x: M, y: titleTop, maxW: W - 2 * M, size: spec.size ?? 92, auto: !spec.size, maxH: spec.maxTitleH ?? (H - titleTop - bottomReserve - (spec.bigLogo ? 260 : 0) - (spec.body ? 200 : 0)) });
-  if (spec.body) y = body(ctx, th, spec.body, M, y + 70, W - 2 * M) + 20;
+  if (spec.body) y = body(ctx, th, spec.body, M, y + (spec.bodyGap ?? 70), W - 2 * M, spec.bodySize) + 20;
   if (spec.flow) { // вертикальна схема з капсул
     let fy = y + 56;
     spec.flow.forEach((step, k) => {
@@ -190,7 +190,25 @@ const SETS2 = [
 const SETS_LI = [
   { name: "li-01", theme: "ink", slides: [{ title: "Усе для росту малого бізнесу — *в одному місці*", titleTop: 400, body: "Знання про маркетинг і продажі, AI-агент для соцмереж і перевірені партнери." }] },
 ];
-const PACKS = { "02": SETS2, li: SETS_LI };
+// ── Сторіз «Куди зникають заявки» (?pack=leads) — 1080×1920, розкривають проблему, без продукту ──
+const LEADS = (title, body, extra = {}) => ({ title, body, bodySize: 44, bodyGap: 100, size: 104, titleTop: 260, ...extra });
+const SETS_LEADS = [
+  { name: "story-leads", theme: "ink", w: 1080, h: 1920, slides: [
+    LEADS("Заявки є. Продажів — *немає.*", "Куди зникають клієнти, які вже вам написали?"),
+    LEADS("Клієнт пише о 21:40. Ви відповідаєте *зранку.*", "За ніч він уже домовився з тими, хто відповів першим."),
+    LEADS("Пишуть у п’ять місць. Відповідь — *у жодному.*", "Директ, Viber, Telegram, дзвінки, форма на сайті. Частина повідомлень просто лишається непрочитаною."),
+    LEADS("«Скільки коштує?» — *«Залежить».*", "І людина йде туди, де одразу назвали орієнтовну ціну."),
+    LEADS("«Я подумаю» — і *ніхто не перепитав.*", "Без нагадування розмова з теплим клієнтом просто згасає."),
+    LEADS("Немає списку заявок — *немає й втрат.* На папері.", "Без одного списку не видно, скільки людей написали і що сталося з кожним."),
+    LEADS("Реклама не «не працює». Вона веде *в порожнечу.*", "Заявка — лише початок продажу. А вирішується він у відповіді."),
+    LEADS("Тест на *сьогодні*", "Напишіть собі ввечері з іншого акаунта, як клієнт. Засічіть, коли й що вам відповіли.", { cta: "Розбір — kruk.marketing/znannya" }),
+  ]},
+];
+// Картинка для соцмереж за замовчуванням (?pack=og) → public/og.png
+const SETS_OG = [
+  { name: "og", theme: "ink", w: 1200, h: 630, slides: [{ title: "Усе для росту *вашого бізнесу*", titleTop: 150, size: 104 }] },
+];
+const PACKS = { "02": SETS2, li: SETS_LI, leads: SETS_LEADS, og: SETS_OG };
 const PACK = PACKS[new URLSearchParams(location.search).get("pack")] ?? SETS;
 
 (async () => {

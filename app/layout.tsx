@@ -31,10 +31,8 @@ export const metadata: Metadata = {
   title: content.meta.title,
   description: content.meta.description,
   alternates: { canonical: "/" },
+  // og:title/og:url не задаємо тут: інакше сторінки без власних openGraph успадкують дані головної. Соцмережі беруть <title> і опис сторінки.
   openGraph: {
-    title: content.meta.title,
-    description: content.meta.description,
-    url: "/",
     siteName: "Крук",
     locale: "uk_UA",
     type: "website",
